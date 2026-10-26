@@ -596,157 +596,34 @@ def event_order_key(e):
     return int(datetime.combine(e["day"], dt_time(23, 59), PT).timestamp())
 
 
-# --- Organizer flyers (best-effort fetch, link fallback) -------------------
-# For every event whose calendar record carries an Instagram post/reel URL,
-# fetch the post's flyer image into flyers/<shortcode>.jpg (next to
-# index.html). Proven method (tested 2026-10-25 on 10 current posts): a
-# plain browser UA gets a JS shell with NO og:image from Instagram; the
-# link-preview crawler UA below is served the page's og:image, which for a
-# flyer post IS the flyer (5/10 full-size, 3/10 reel covers, 2/10 missed).
-# Cache-first: flyers already on disk (the Actions checkout carries the
-# previously committed ones; recurring series share one post across many
-# instances) are reused without a fetch. Validate hard before saving —
-# JPEG magic bytes, >= 10 KB (smaller is a stub/placeholder), width
-# >= 300 px parsed from the SOF header. Flyers are decoration on top of the
-# "Flyer post" links and NEVER fail the build: any miss, error or stub
-# leaves the event with the link-only card it has always had. Files no
-# current event references are pruned (their events rolled off the window).
-# Set LINEUP_NO_FLYERS=1 to skip the pass entirely.
+# --- Organizer flyers: REMOVED 2026-10-25 at Kani's direction --------------
+# The fetched-flyer figures never sat right in the card box, so the
+# magazine is back to link-only cards (the "Flyer post" chip). The build
+# still leaves a flyers/ folder in the repo holding only a .gitkeep
+# placeholder: the Actions commit step runs `git add index.html flyers`,
+# which fails if the folder disappears. Any *.jpg sitting in the checkout
+# is deleted here so the removal lands in the bot's commit.
 FLYERS_DIR = HERE / "flyers"
-FLYER_UA = ("facebookexternalhit/1.1 "
-            "(+http://www.facebook.com/externalhit_uatext.php)")
-FLYER_MIN_BYTES = 10 * 1024
-FLYER_MIN_WIDTH = 300
-FLYER_GOOD_WIDTH = 600
-
-FLYER_CSS = """
-/* Organizer flyers on event cards (generator-injected). A card whose
-   flyer was fetched shows it as a framed figure under the title, linked
-   to the flyer post; cards without one keep the link-only layout. */
-.event-flyer{display:block;margin:2px 0 4px;border:1px solid var(--cyan-soft);border-radius:10px;overflow:hidden;background:#05030d;box-shadow:0 0 14px rgba(34,211,238,.1)}
-.event-flyer a{display:block;position:relative;overflow:hidden}
-.event-flyer img.flyer-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(18px) brightness(.6);transform:scale(1.1)}
-.event-flyer img.flyer-fg{position:relative;z-index:1;display:block;width:100%;height:auto;max-height:460px;object-fit:contain;margin:0 auto}"""
 
 
-def _shortcode(post_url):
-    """'https://www.instagram.com/reel/AbC_12-3/' -> 'AbC_12-3' (or '')."""
-    m = re.search(r"instagram\.com/(?:p|reel)/([A-Za-z0-9_-]+)", post_url or "")
-    return m.group(1) if m else ""
-
-
-def _jpeg_width(data):
-    """Image width in px from a JPEG's SOF0/1/2 header; 0 if not a JPEG
-    with a parseable frame header."""
-    if len(data) < 10 or data[0] != 0xFF or data[1] != 0xD8:
-        return 0
-    i = 2
-    while i + 8 < len(data):
-        if data[i] != 0xFF:
-            i += 1
-            continue
-        marker = data[i + 1]
-        if marker in (0xC0, 0xC1, 0xC2):
-            return (data[i + 7] << 8) | data[i + 8]
-        if marker in (0xD9, 0xDA):  # EOI / start of scan: header is over
-            return 0
-        seglen = (data[i + 2] << 8) | data[i + 3]
-        if seglen < 2:
-            return 0
-        i += 2 + seglen
-    return 0
-
-
-def _flyer_get(url):
-    req = urllib.request.Request(url, headers={
-        "User-Agent": FLYER_UA,
-        "Accept": "text/html,application/xhtml+xml,image/jpeg,*/*",
-    })
-    with urllib.request.urlopen(req, timeout=25) as r:
-        return r.read()
-
-
-def _fetch_flyer(post_url):
-    """(jpeg_bytes, width) for a post's flyer, or None on any miss."""
-    try:
-        page = _flyer_get(post_url).decode("utf-8", "ignore")
-    except Exception:
-        return None
-    img_url = None
-    m = (re.search(r'<meta[^>]+property="og:image"[^>]+content="([^"]+)"', page)
-         or re.search(r'<meta[^>]+content="([^"]+)"[^>]+property="og:image"', page))
-    if m:
-        img_url = m.group(1).replace("&amp;", "&")
-    if not img_url:
-        return None
-    try:
-        data = _flyer_get(img_url)
-    except Exception:
-        return None
-    if len(data) < FLYER_MIN_BYTES:
-        return None  # stub / placeholder (a 1 KB one was seen in testing)
-    width = _jpeg_width(data)
-    if width < FLYER_MIN_WIDTH:
-        return None
-    return data, width
-
-
-def sync_flyers(events):
-    """Fetch/cache/prune organizer flyers for this build's events.
-
-    Returns {event_index: 'flyers/<shortcode>.jpg'} for events whose flyer
-    is on disk, and prints a one-line stats summary. Never raises."""
-    if os.environ.get("LINEUP_NO_FLYERS"):
-        print("flyers : skipped (LINEUP_NO_FLYERS set) — link-only edition")
-        return {}
-    have = {}
+def clear_flyers():
+    """Leave flyers/ containing only .gitkeep (see note above)."""
     try:
         FLYERS_DIR.mkdir(exist_ok=True)
-        wanted = {}
-        for e in events:
-            code = _shortcode(e.get("post"))
-            if code:
-                wanted.setdefault(code, e["post"])
-        on_disk = set()
-        n_cached = n_good = n_soft = n_missed = 0
-        for code in sorted(wanted):
-            path = FLYERS_DIR / f"{code}.jpg"
-            if path.exists() and path.stat().st_size >= FLYER_MIN_BYTES:
-                on_disk.add(code)
-                n_cached += 1
-                continue
-            got = _fetch_flyer(wanted[code])
-            if got is None:
-                n_missed += 1
-            else:
-                data, width = got
-                path.write_bytes(data)
-                on_disk.add(code)
-                if width >= FLYER_GOOD_WIDTH:
-                    n_good += 1
-                else:
-                    n_soft += 1
-            time.sleep(0.5)
-        for idx, e in enumerate(events):
-            code = _shortcode(e.get("post"))
-            if code and code in on_disk:
-                have[idx] = f"flyers/{code}.jpg"
-        n_pruned = 0
+        n_removed = 0
         for f in FLYERS_DIR.glob("*.jpg"):
-            if f.stem not in wanted:
-                f.unlink()
-                n_pruned += 1
-        files = list(FLYERS_DIR.glob("*.jpg"))
-        total_kb = sum(f.stat().st_size for f in files) // 1024
-        print(f"flyers : {len(wanted)} distinct post URLs | {n_cached} cached | "
-              f"{n_good} fetched full-size | {n_soft} fetched reel-size | "
-              f"{n_missed} missed (link only) | {len(files)} files, "
-              f"{total_kb} KB on disk | pruned {n_pruned}")
+            f.unlink()
+            n_removed += 1
+        keep = FLYERS_DIR / ".gitkeep"
+        if not keep.exists():
+            keep.write_text("", encoding="utf-8")
+        if n_removed:
+            print(f"flyers : removed {n_removed} stale flyer image(s) - "
+                  "flyers/ now holds only .gitkeep")
+        else:
+            print("flyers : link-only edition - flyers/ holds only .gitkeep")
     except Exception as exc:
-        print(f"flyers : pass failed ({exc!r}) — link-only edition")
-        return {}
-    return have
-
+        print(f"flyers : cleanup failed ({exc!r}) - continuing link-only")
 
 
 # --- Live countdown + Add to Calendar (injected into the template) -------
@@ -1025,8 +902,7 @@ function cardHTML(e,solo){
   var ei=EVENTS.indexOf(e);
   var post=POSTS[e.title+'|'+e.date];
   var flyer=post?'<a class="flyer-link" href="'+post+'" target="_blank" rel="noopener" aria-label="Open the original flyer post for '+e.title+' on Instagram">Flyer post ↗</a>':'';
-  var fig=(e.flyer&&post)?'<figure class="flyer-fig event-flyer"><a href="'+post+'" target="_blank" rel="noopener" aria-label="Open the original flyer post for '+e.title+' on Instagram"><img class="flyer-bg" src="'+e.flyer+'" alt="" aria-hidden="true" loading="lazy"/><img class="flyer-fg" src="'+e.flyer+'" alt="'+e.title+'" loading="lazy"/></a></figure>':'';
-  return '<article class="event s-'+e.cats[0]+(solo?' solo':'')+'"><div class="date"><span class="tz-time" data-ei="'+ei+'">'+e.time+'</span></div><h3>'+e.title+'</h3>'+fig+'<p>'+e.desc+'</p><div class="meta">'+hostChip(e.host)+flyer+cdChip(e)+calBtn(e)+'<span>'+e.where+'</span><span>'+e.platform+'</span></div></article>';
+  return '<article class="event s-'+e.cats[0]+(solo?' solo':'')+'"><div class="date"><span class="tz-time" data-ei="'+ei+'">'+e.time+'</span></div><h3>'+e.title+'</h3><p>'+e.desc+'</p><div class="meta">'+hostChip(e.host)+flyer+cdChip(e)+calBtn(e)+'<span>'+e.where+'</span><span>'+e.platform+'</span></div></article>';
 }
 
 /* Build one page per host, in the baked soonest-first order */
@@ -1284,7 +1160,7 @@ def main():
     events.sort(key=lambda e: (e["day"], e["sort"], e["title"]))
     if not events:
         sys.exit("no events in window — refusing to build an empty magazine")
-    flyer_by_idx = sync_flyers(events)
+    clear_flyers()
     total = len(events)
     last_day = max(e["day"] for e in events)
 
@@ -1301,10 +1177,7 @@ def main():
             "t": e["summary"], "h": e["host"], "p": e["platform"],
             "ap": ics_time_note(e), "u": e["post"],
         },
-        # Fetched organizer flyer (relative path) or None: the card
-        # renders the framed figure when set, link-only otherwise.
-        "flyer": flyer_by_idx.get(i),
-    } for i, e in enumerate(events)]
+    } for e in events]
     posts = {f"{esc(e['title'])}|{e['date_key']}": e["post"]
              for e in events if e["post"]}
 
@@ -1396,7 +1269,7 @@ def main():
     # Injected CSS: countdown chips, zone toggle, search, host pages, marquee.
     assert out.count("</style>") == 1, "style anchor"
     out = out.replace("</style>",
-                      CD_CSS + TZ_CSS + SEARCH_CSS + HOST_CSS + MQ_CSS + FLYER_CSS + "\n</style>")
+                      CD_CSS + TZ_CSS + SEARCH_CSS + HOST_CSS + MQ_CSS + "\n</style>")
 
     # Filter panel: name search at the top, zone toggle at the bottom.
     # (The flip bar itself keeps only Prev / label / Next + Hosts + Filter.)
