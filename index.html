@@ -262,11 +262,21 @@ a.ig:hover{color:#fbcfe8; text-decoration:underline; text-underline-offset:3px}
 .fb-days button.host-chip b{font-family:var(--disp);font-size:13.5px;letter-spacing:.03em;color:var(--pink-hi);font-weight:700;text-transform:none}
 .fb-days button.host-chip span{font-size:9.5px;color:var(--ink3);letter-spacing:.05em}
 .fb-days button.host-chip.on b{color:#fbcfe8}
-/* Marquee — live ticker items (generator-injected) */
+.date-divider{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan-hi);text-shadow:0 0 8px rgba(34,211,238,.35);margin:24px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--cyan-soft)}
+.date-divider:first-child{margin-top:4px}
+/* Marquee — live ticker items (generator-injected). The scroll is driven
+   by a JS requestAnimationFrame loop (see the marquee block in CORE_JS),
+   NOT by the template's CSS keyframes: Android's "Remove animations"
+   setting makes prefers-reduced-motion match, and the template's
+   reduced-motion block freezes .ticker-track with animation:none, which
+   killed the ticker outright on phones. The rule below therefore retires
+   the CSS animation for good (!important beats both the base keyframe
+   rule and the reduced-motion freeze), and the JS transform is exempt
+   from the freeze — the ticker's motion IS its content. Pausing is also
+   JS-driven (pointer / touch / focus), not animation-play-state. */
+.ticker-track{animation:none!important;will-change:transform}
 .ticker .mq-item{font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--ink2);background:none;border:0;padding:0;cursor:pointer;white-space:nowrap}
 .ticker .mq-item:hover{color:var(--cyan-hi);text-decoration:underline;text-underline-offset:3px}
-.ticker:hover .ticker-track,.ticker:focus-within .ticker-track{animation-play-state:paused}
-@media(hover:none){.ticker:active .ticker-track{animation-play-state:paused}}
 </style>
 </head>
 <body>
@@ -1797,7 +1807,7 @@ function cardHTML(e,solo){
   var ei=EVENTS.indexOf(e);
   var post=POSTS[e.title+'|'+e.date];
   var flyer=post?'<a class="flyer-link" href="'+post+'" target="_blank" rel="noopener" aria-label="Open the original flyer post for '+e.title+' on Instagram">Flyer post ↗</a>':'';
-  return '<article class="event s-'+e.cats[0]+(solo?' solo':'')+'"><div class="date">'+e.date+' · <span class="tz-time" data-ei="'+ei+'">'+e.time+'</span></div><h3>'+e.title+'</h3><p>'+e.desc+'</p><div class="meta">'+hostChip(e.host)+flyer+cdChip(e)+calBtn(e)+'<span>'+e.where+'</span><span>'+e.platform+'</span></div></article>';
+  return '<article class="event s-'+e.cats[0]+(solo?' solo':'')+'"><div class="date"><span class="tz-time" data-ei="'+ei+'">'+e.time+'</span></div><h3>'+e.title+'</h3><p>'+e.desc+'</p><div class="meta">'+hostChip(e.host)+flyer+cdChip(e)+calBtn(e)+'<span>'+e.where+'</span><span>'+e.platform+'</span></div></article>';
 }
 
 /* Build one page per host, in the baked soonest-first order */
@@ -1815,7 +1825,7 @@ HOSTS.forEach(function(h,hi){
     flyer='<figure class="flyer-fig host-flyer"><img src="'+h.flyer.img+'" alt="'+h.flyer.alt+'"/><figcaption>The official flyer, as posted by '+(h.handle.charAt(0)==='@'?igLink(h.handle):h.handle)+(h.flyer.post?' · <a class="ig" href="'+h.flyer.post+'" target="_blank" rel="noopener">Original flyer post ↗</a>':'')+'</figcaption></figure>';
   }
   sec.innerHTML='<div class="host-head"><div class="host-head-main"><p class="host-kicker">Host · '+(hi+1)+' of '+HOSTS.length+'</p><h2 class="host-name" tabindex="-1">'+handleHTML+'</h2>'
-    +'<p class="host-next">Next up — <b>'+first.date+'</b> · <span class="tz-time" data-ei="'+h.eis[0]+'">'+first.time+'</span></p>'
+    +'<p class="host-next">Next up — <b>'+first.title+'</b> · <span class="tz-time" data-ei="'+h.eis[0]+'">'+first.time+'</span></p>'
     +'<p class="host-meta">'+h.eis.length+(h.eis.length===1?' event':' events')+' in this issue · '+first.date+' – '+last.date+'</p></div>'
     +'<div class="day-count" data-count></div></div><div class="day-rule"></div>'+flyer+'<div data-body></div>';
   sec._events=h.eis.map(function(ei){return EVENTS[ei];});
@@ -1865,12 +1875,29 @@ var current=0, filter='all';
 var prevBtn=document.getElementById('prevBtn'), nextBtn=document.getElementById('nextBtn');
 var fbTitle=document.getElementById('fbTitle'), fbCount=document.getElementById('fbCount');
 
+/* Group a host's (chronological) events under one slim divider per
+   distinct day, so the date is stated once instead of on every card. */
+function dayLabel(e){
+  var d=new Date(e.dayiso+'T12:00:00');
+  return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+}
+function groupByDay(list){
+  var groups=[],cur=null;
+  list.forEach(function(e){
+    if(!cur||cur.dayiso!==e.dayiso){cur={dayiso:e.dayiso,label:dayLabel(e),events:[]};groups.push(cur);}
+    cur.events.push(e);
+  });
+  return groups;
+}
 function renderHost(sec){
   if(!sec._events) return;
   var shown=sec._events.filter(function(e){return matches(e,filter)});
   var body=sec.querySelector('[data-body]');
   if(shown.length){
-    body.innerHTML='<div class="day-grid">'+shown.map(function(e){return cardHTML(e, shown.length===1)}).join('')+'</div>';
+    body.innerHTML=groupByDay(shown).map(function(g){
+      return '<div class="date-divider" role="separator">'+g.label+'</div>'
+        +'<div class="day-grid">'+g.events.map(function(e){return cardHTML(e, shown.length===1)}).join('')+'</div>';
+    }).join('');
   }else{
     body.innerHTML='<div class="day-empty">'+(SEARCHQ?'No events match &ldquo;'+qEsc(SEARCHQ)+'&rdquo; for this host — clear the search in Filter, or flip on.':'Nothing in this lane for this host — flip on, or switch the filter back to All Events.')+'</div>';
   }
@@ -1955,6 +1982,27 @@ function mqPicks(now){
   if(soon.length)return soon.map(function(e){return{e:e,soon:true}});
   return up.slice(0,5).map(function(e){return{e:e,soon:false}});
 }
+/* JS scroll driver — the track's CSS animation is disabled (see MQ_CSS:
+   the template's reduced-motion rule froze it on Android). A rAF loop
+   advances the track ~36px/s (0.6px per 60fps frame) and wraps at half
+   the track width, where the duplicated content takes over seamlessly.
+   Pauses while the ticker is touched / hovered / focused. */
+var mqState={off:0,last:0,paused:false,run:false};
+function mqApply(){
+  var t=document.getElementById('tickerTrack');
+  if(t)t.style.transform='translateX('+(-mqState.off)+'px)';
+}
+function mqFrame(ts){
+  if(!mqState.run)return;
+  if(mqState.last&&!mqState.paused){
+    var t=document.getElementById('tickerTrack');
+    var half=t?t.scrollWidth/2:0;
+    if(half>0){mqState.off=(mqState.off+(ts-mqState.last)*0.036)%half;mqApply();}
+  }
+  mqState.last=ts;
+  requestAnimationFrame(mqFrame);
+}
+function mqStart(){if(mqState.run)return;mqState.run=true;mqState.last=0;requestAnimationFrame(mqFrame);}
 function renderMarquee(){
   var track=document.getElementById('tickerTrack');
   if(!track)return;
@@ -1974,6 +2022,7 @@ function renderMarquee(){
   var half='';
   for(var r=0;r<reps;r++){half+=items.join(' <i>◆</i> ')+' <i>◆</i> ';}
   track.innerHTML='<span class="mq-set">'+half+'</span><span class="mq-set">'+half+'</span>';
+  mqState.off=0;mqApply();
 }
 var tickerEl=document.getElementById('tickerTrack');
 if(tickerEl){tickerEl.addEventListener('click',function(ev){
@@ -1986,7 +2035,17 @@ var _tickCDHost=tickCD;
 tickCD=function(){_tickCDHost();renderMarquee();};
 var _applyTZHost=applyTZ;
 applyTZ=function(){_applyTZHost();renderMarquee();};
+var tickerBox=document.querySelector('.ticker');
+if(tickerBox){
+  ['pointerdown','touchstart','mouseenter','focusin'].forEach(function(n){
+    tickerBox.addEventListener(n,function(){mqState.paused=true;},{passive:true});
+  });
+  ['pointerup','pointercancel','touchend','mouseleave','focusout'].forEach(function(n){
+    tickerBox.addEventListener(n,function(){mqState.paused=false;},{passive:true});
+  });
+}
 renderMarquee();
+mqStart();
 
 renderAll();
 goTo(0,false);
