@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="color-scheme" content="dark"/>
+<link rel="icon" href="data:,"/>
+<title>The Lineup — GTA RP Event Magazine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* ===== NEON FLIP-THROUGH — cover first, then one spread per day ===== */
+:root{
+  color-scheme:dark;
+  --void:#0d0716; --void2:#150a28;
+  --panel:#150c2a; --panel2:#1a0f33;
+  --ink:#ece8f7; --ink2:#bcb3da; --ink3:#9187b5;
+  --cyan:#22d3ee; --cyan-hi:#67e8f9; --cyan-soft:rgba(34,211,238,.35);
+  --pink:#f471b5; --pink-hi:#f9a8d4; --mag:#e879f9;
+  --violet:#a78bfa; --violet-hi:#c4b5fd;
+  --amber:#fbbf24; --amber-hi:#fcd34d;
+  --rose:#fb7185; --rose-hi:#fda4af;
+  --line:rgba(150,128,214,.26); --line2:rgba(150,128,214,.15);
+  --sans:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+  --disp:'Rajdhani',-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+  --mono:'Share Tech Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0; color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.55;
+  background:
+    radial-gradient(900px 520px at 85% -60px, rgba(232,121,249,.13), rgba(232,121,249,0) 60%),
+    radial-gradient(820px 560px at -10% 30%, rgba(34,211,238,.10), rgba(34,211,238,0) 62%),
+    radial-gradient(1000px 700px at 110% 78%, rgba(124,58,237,.12), rgba(124,58,237,0) 65%),
+    linear-gradient(180deg, var(--void2), var(--void) 340px);
+  background-color:var(--void); background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(232,121,249,.38); color:#fff}
+a{color:var(--cyan-hi); text-decoration:none}
+a:hover{text-decoration:underline}
+img{display:block; max-width:100%}
+.wrap{max-width:1180px; margin:0 auto; padding:0 18px}
+:focus-visible{outline:2px solid var(--cyan); outline-offset:2px; border-radius:2px}
+
+/* TICKER — neon wire across the top */
+.ticker{background:rgba(10,5,22,.92); overflow:hidden; padding:9px 0; border-bottom:1px solid var(--cyan-soft); box-shadow:0 1px 14px rgba(34,211,238,.18)}
+.ticker-track{display:flex; width:max-content; animation:tick 46s linear infinite}
+.ticker span{font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; padding-right:14px; color:var(--ink2)}
+.ticker b{color:var(--amber-hi); font-weight:400; text-shadow:0 0 8px rgba(251,191,36,.5)}
+.ticker i{color:var(--pink); font-style:normal; text-shadow:0 0 8px rgba(244,113,182,.6)}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* FLIP BAR — sticky reader chrome: flip controls, day jump strip, filters */
+.flipbar{position:sticky; top:0; z-index:40; background:rgba(10,5,22,.94); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); border-bottom:1px solid rgba(34,211,238,.35); box-shadow:0 2px 18px rgba(34,211,238,.12)}
+.fb-main{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0 8px}
+.fb-btn{appearance:none; border:1px solid var(--cyan); background:rgba(34,211,238,.1); color:var(--cyan-hi); font-family:var(--mono); font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; padding:9px 16px; border-radius:999px; cursor:pointer; box-shadow:0 0 10px rgba(34,211,238,.22); white-space:nowrap}
+.fb-btn:hover:not(:disabled){background:rgba(34,211,238,.24); color:#ecfeff}
+.fb-btn:disabled{opacity:.32; cursor:default; box-shadow:none}
+.fb-label{text-align:center; min-width:0}
+.fb-label b{display:block; font-family:var(--disp); font-weight:700; font-size:19px; letter-spacing:.05em; text-transform:uppercase; color:#f7f4ff; line-height:1.05; text-shadow:0 0 10px rgba(232,121,249,.4); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.fb-label span{font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink3)}
+.fb-tools{display:flex; justify-content:center; gap:8px; margin-top:5px}
+.fb-tools button{appearance:none; border:1px solid var(--line); background:rgba(21,12,42,.7); color:var(--ink2); font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; padding:4px 10px; border-radius:999px; cursor:pointer}
+.fb-tools button:hover{border-color:var(--cyan-soft); color:var(--cyan-hi)}
+.fb-tools button[aria-expanded="true"]{border-color:var(--pink); color:var(--pink-hi); background:rgba(244,113,182,.1)}
+.fb-days{display:none; flex-wrap:wrap; gap:6px; padding:8px 0 4px}
+.flipbar.open-days .fb-days{display:flex}
+.fb-days button{appearance:none; border:1px solid var(--line2); background:rgba(21,12,42,.7); color:var(--ink2); font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; padding:5px 9px; border-radius:4px; cursor:pointer}
+.fb-days button:hover{border-color:var(--cyan-soft); color:var(--cyan-hi)}
+.fb-days button.on{border-color:var(--pink); color:var(--pink-hi); background:rgba(244,113,182,.1); box-shadow:0 0 8px rgba(244,113,182,.35)}
+.fb-days button:disabled{opacity:.3; cursor:default; box-shadow:none}
+.fb-filters{display:none; flex-wrap:wrap; gap:7px; padding:4px 0 11px}
+.flipbar.open-filters .fb-filters{display:flex}
+.fb-filters button{appearance:none; border:1px solid var(--line); border-radius:999px; background:transparent; color:var(--ink2); padding:6px 12px; font-family:var(--sans); font-weight:600; letter-spacing:.05em; text-transform:uppercase; font-size:11px; cursor:pointer}
+.fb-filters button:hover{border-color:var(--cyan-soft); color:var(--cyan-hi)}
+.fb-filters button.active{background:rgba(34,211,238,.16); color:#a5f3fc; border-color:var(--cyan); box-shadow:0 0 10px rgba(34,211,238,.35)}
+
+/* PAGES — one screen at a time, flipped */
+.page{display:none}
+.page.active{display:block; animation:flipIn .38s ease both}
+@keyframes flipIn{from{opacity:0; transform:translateX(26px)}to{opacity:1; transform:none}}
+.page.back.active{animation:flipBack .38s ease both}
+@keyframes flipBack{from{opacity:0; transform:translateX(-26px)}to{opacity:1; transform:none}}
+
+/* COVER SCREEN */
+.cover-screen{position:relative; margin:22px auto 0; border:1px solid var(--cyan-soft); border-top:2px solid rgba(244,113,182,.65); border-radius:14px; background:#000; overflow:hidden; box-shadow:0 0 22px rgba(34,211,238,.14), 0 0 46px rgba(232,121,249,.08); min-height:min(82vh,760px); display:flex; flex-direction:column}
+.cover-screen>img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.97}
+.cover-shade{position:absolute; inset:0; background:linear-gradient(180deg, rgba(9,4,20,.42) 0%, rgba(9,4,20,0) 30%, rgba(9,4,20,0) 52%, rgba(9,4,20,.94) 88%)}
+.cover-top{position:relative; display:flex; justify-content:space-between; gap:10px; padding:16px 18px; color:#fff; font-family:var(--mono); letter-spacing:.12em; text-transform:uppercase; font-size:11px; text-shadow:0 2px 12px rgba(0,0,0,.8)}
+.cover-top .issue-chip{background:rgba(225,29,72,.85); padding:5px 9px; border-radius:4px; border:1px solid rgba(251,113,133,.8); box-shadow:0 0 10px rgba(251,113,133,.45); text-shadow:none}
+.cover-mid{position:relative; padding:8px 20px 0}
+.logo-kicker{font-size:11px; font-weight:700; letter-spacing:.24em; text-transform:uppercase; color:var(--pink-hi); text-shadow:0 0 10px rgba(244,113,182,.55), 0 2px 10px rgba(0,0,0,.8); margin:0 0 4px}
+.logo{font-family:var(--disp); font-weight:700; line-height:.85; margin:0; font-size:clamp(58px,10.5vw,128px); letter-spacing:.02em; text-transform:uppercase; color:#f7f4ff; text-shadow:0 0 14px rgba(34,211,238,.5), 0 0 38px rgba(34,211,238,.28), 0 0 64px rgba(232,121,249,.3), 0 3px 18px rgba(0,0,0,.55)}
+.logo .slant{display:inline-block; color:var(--mag); text-shadow:0 0 14px rgba(232,121,249,.65), 0 0 42px rgba(232,121,249,.35), 0 3px 18px rgba(0,0,0,.55)}
+.logo-sub{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px}
+.pill{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; border:1px solid var(--line); border-radius:999px; padding:6px 12px; background:rgba(13,7,22,.82); color:var(--ink2)}
+.pill.hot{border-color:rgba(244,113,182,.65); color:var(--pink-hi); background:rgba(244,113,182,.08); box-shadow:0 0 9px rgba(244,113,182,.25)}
+.pill.cool{border-color:rgba(34,211,238,.6); color:var(--cyan-hi); background:rgba(34,211,238,.08); box-shadow:0 0 9px rgba(34,211,238,.25)}
+.cover-lines{position:relative; margin-top:auto; display:grid; grid-template-columns:1.25fr .75fr; gap:18px; padding:20px; color:#fff; align-items:end}
+.cover-kicker{display:inline-block; background:rgba(251,191,36,.14); color:var(--amber-hi); border:1px solid rgba(251,191,36,.7); font-family:var(--mono); letter-spacing:.12em; text-transform:uppercase; font-size:11px; padding:5px 10px; border-radius:4px; box-shadow:0 0 10px rgba(251,191,36,.3)}
+.cover-head{font-family:var(--disp); font-weight:700; font-size:clamp(42px,7vw,78px); line-height:.9; margin:12px 0 8px; letter-spacing:.02em; text-transform:uppercase; color:#f7f4ff; text-shadow:0 0 16px rgba(34,211,238,.55), 0 0 44px rgba(34,211,238,.3)}
+.cover-head i{color:var(--pink-hi); font-style:normal; text-shadow:0 0 16px rgba(244,113,182,.7), 0 0 44px rgba(244,113,182,.35)}
+.cover-dek{font-size:15px; line-height:1.55; max-width:54ch; color:var(--ink2); margin:0}
+.cover-bullets{list-style:none; margin:0; padding:0; display:grid; gap:10px}
+.cover-bullets li{background:rgba(13,7,24,.78); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:13px; line-height:1.45; color:var(--ink2)}
+.cover-bullets b{display:block; font-family:var(--mono); letter-spacing:.12em; text-transform:uppercase; font-size:10.5px; font-weight:400; color:var(--cyan-hi); margin-bottom:2px; text-shadow:0 0 8px rgba(34,211,238,.5)}
+.open-btn{appearance:none; border:1px solid var(--pink); background:rgba(244,113,182,.14); color:var(--pink-hi); font-family:var(--mono); font-size:13px; letter-spacing:.1em; text-transform:uppercase; padding:13px 22px; border-radius:999px; cursor:pointer; box-shadow:0 0 14px rgba(244,113,182,.35)}
+.open-btn:hover{background:rgba(244,113,182,.3); color:#fdf2f8}
+.cover-foot{display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; padding:14px 4px 30px}
+.cover-foot .caption{font-size:11px; color:var(--ink3); font-family:var(--mono); letter-spacing:.06em; text-transform:uppercase; line-height:1.7}
+.flip-hint{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink3); text-align:center; padding:0 0 26px}
+
+/* DAY SPREAD HEAD — huge day numeral */
+.day-head{display:flex; align-items:flex-end; gap:18px; margin:30px 0 6px; flex-wrap:wrap}
+.day-num{font-family:var(--disp); font-weight:700; font-size:clamp(96px,17vw,168px); line-height:.78; color:#f7f4ff; text-shadow:0 0 18px rgba(34,211,238,.45), 0 0 52px rgba(232,121,249,.28)}
+.day-head .day-meta{padding-bottom:10px}
+.day-dow{font-family:var(--mono); font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--pink-hi); text-shadow:0 0 9px rgba(244,113,182,.5); margin:0 0 4px}
+.day-full{font-family:var(--disp); font-weight:700; font-size:clamp(30px,4.6vw,44px); line-height:1; margin:0; letter-spacing:.03em; text-transform:uppercase; color:#f7f4ff}
+.day-note{margin:6px 0 0; font-size:14.5px; color:var(--ink2); max-width:56ch}
+.day-badge{display:inline-block; margin-left:10px; vertical-align:middle; font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:#150a28; background:var(--amber); border-radius:4px; padding:4px 9px; box-shadow:0 0 12px rgba(251,191,36,.5)}
+.day-count{margin-left:auto; padding-bottom:12px; font-family:var(--mono); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--cyan-hi); text-shadow:0 0 8px rgba(34,211,238,.4); white-space:nowrap}
+.day-rule{height:1px; background:linear-gradient(90deg, var(--cyan), rgba(244,113,182,.7), transparent); box-shadow:0 0 10px rgba(34,211,238,.35); margin:10px 0 22px}
+
+/* FEATURE — photo-led spread block inside a day */
+.feature{border:1px solid var(--cyan-soft); border-top:2px solid rgba(244,113,182,.55); border-radius:12px; background:linear-gradient(180deg, rgba(26,15,51,.93), rgba(15,8,30,.95)); margin-bottom:22px; overflow:hidden; box-shadow:0 0 20px rgba(34,211,238,.07), inset 0 0 34px rgba(13,7,22,.45)}
+.feature.split{display:grid; grid-template-columns:1fr 1fr}
+.feature.split .feature-body{display:flex; flex-direction:column; justify-content:center}
+.feature-body{padding:22px 24px 24px}
+.feature-body h3{font-family:var(--disp); font-weight:700; font-size:clamp(32px,4.4vw,50px); line-height:.95; margin:0 0 10px; letter-spacing:.03em; text-transform:uppercase; color:#f7f4ff; text-shadow:0 0 12px rgba(34,211,238,.35)}
+.feature-body h3 span{color:var(--pink-hi); text-shadow:0 0 12px rgba(244,113,182,.55)}
+.feature-body p{font-size:14.5px; line-height:1.65; color:var(--ink2); max-width:72ch}
+.pull{font-size:18px; font-weight:600; line-height:1.45; background:rgba(232,121,249,.07); border:1px solid rgba(232,121,249,.35); border-radius:10px; padding:14px 16px; margin:16px 0; color:var(--ink); box-shadow:0 0 14px rgba(232,121,249,.1), inset 0 0 20px rgba(13,7,22,.4)}
+.pull::before{content:"“ "; color:var(--mag); text-shadow:0 0 8px rgba(232,121,249,.6)}
+.facts{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+.facts div{background:rgba(10,5,22,.7); border:1px solid var(--line2); border-radius:8px; padding:8px 12px; font-size:13px; font-weight:600; color:var(--ink)}
+.facts div b{display:block; font-family:var(--mono); letter-spacing:.12em; text-transform:uppercase; font-size:9.5px; color:var(--cyan-hi); font-weight:400; margin-bottom:1px}
+.flyer-fig{margin:0; background:#05030d; display:flex; flex-direction:column}
+.flyer-fig img{width:100%; height:100%; flex:1; object-fit:cover}
+.flyer-fig figcaption{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink3); padding:10px 14px; border-top:1px solid var(--line2); line-height:1.7}
+
+/* DAY GRID — the rest of the day's listings */
+.day-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; padding-bottom:8px}
+.event{border:1px solid rgba(34,211,238,.26); border-radius:12px; background:linear-gradient(180deg, rgba(27,16,54,.94), rgba(16,9,33,.96)); padding:20px 16px 16px; display:flex; flex-direction:column; gap:8px; position:relative; overflow:hidden; box-shadow:0 0 12px rgba(34,211,238,.05), inset 0 0 22px rgba(13,7,22,.4)}
+.event::before{content:""; position:absolute; top:0; left:0; right:0; height:3px; background:var(--cyan); box-shadow:0 0 10px rgba(34,211,238,.7)}
+.event.s-halloween::before{background:var(--pink); box-shadow:0 0 10px rgba(244,113,182,.7)}
+.event.s-launch::before{background:var(--amber); box-shadow:0 0 10px rgba(251,191,36,.7)}
+.event.s-contest::before{background:var(--rose); box-shadow:0 0 10px rgba(251,113,133,.7)}
+.event .date{font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; color:var(--pink-hi); text-shadow:0 0 8px rgba(244,113,182,.4)}
+.event h3{margin:0; font-family:var(--disp); font-size:21px; line-height:1.15; font-weight:700; letter-spacing:.02em; color:#f7f4ff}
+.event p{margin:0; font-size:13.5px; line-height:1.55; color:var(--ink2)}
+.event.solo{grid-column:1/-1; max-width:680px; padding:28px 24px 22px}
+.event.solo h3{font-size:clamp(28px,4.4vw,38px)}
+.event.solo p{font-size:15px}
+.meta{margin-top:auto; padding-top:10px; display:flex; flex-wrap:wrap; gap:6px}
+.meta span,.meta a{font-size:11px; font-family:var(--mono); letter-spacing:.04em; text-transform:uppercase; border:1px solid var(--line2); border-radius:999px; padding:4px 9px; color:var(--ink2); background:rgba(21,12,42,.85)}
+.meta a{text-decoration:none; color:var(--pink-hi); border-color:rgba(244,113,182,.55); background:rgba(244,113,182,.07)}
+.meta a:hover{border-color:var(--pink); color:#fbcfe8; box-shadow:0 0 10px rgba(244,113,182,.45); text-shadow:0 0 8px rgba(244,113,182,.6); text-decoration:none}
+.meta a.flyer-link{color:var(--cyan-hi); border-color:rgba(34,211,238,.55); background:rgba(34,211,238,.07)}
+.meta a.flyer-link:hover{border-color:var(--cyan); color:#ecfeff; box-shadow:0 0 10px rgba(34,211,238,.45); text-shadow:0 0 8px rgba(34,211,238,.6)}
+a.ig{color:var(--pink-hi); font-weight:400; font-family:var(--mono); font-size:.94em; text-decoration:none; text-shadow:0 0 7px rgba(244,113,182,.35)}
+a.ig:hover{color:#fbcfe8; text-decoration:underline; text-underline-offset:3px}
+.day-empty{border:1px dashed rgba(167,139,250,.45); border-radius:12px; padding:22px; text-align:center; color:var(--ink2); font-size:14px; font-style:italic; margin-bottom:10px}
+
+/* HOST SPOTLIGHT — one organizer, a full spread of their own */
+.spot-head{margin:30px 0 18px}
+.spot-kicker{font-family:var(--mono); font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--amber-hi); text-shadow:0 0 9px rgba(251,191,36,.5); margin:0 0 6px}
+.spot-title{font-family:var(--disp); font-weight:700; font-size:clamp(38px,6vw,64px); line-height:.95; margin:0; letter-spacing:.02em; text-transform:uppercase; color:#f7f4ff; text-shadow:0 0 14px rgba(34,211,238,.4)}
+.spot-title span{color:var(--pink-hi); text-shadow:0 0 14px rgba(244,113,182,.55)}
+.spot-lede{margin:10px 0 0; font-size:15.5px; line-height:1.6; color:var(--ink2); max-width:62ch}
+.spot-panel{display:grid; grid-template-columns:1fr 1fr; border:1px solid rgba(251,191,36,.5); border-top:2px solid rgba(244,113,182,.6); border-radius:12px; overflow:hidden; background:linear-gradient(180deg, rgba(26,15,51,.93), rgba(15,8,30,.95)); box-shadow:0 0 22px rgba(251,191,36,.1), inset 0 0 34px rgba(13,7,22,.45); margin-bottom:26px}
+.spot-body{padding:24px 26px 26px; display:flex; flex-direction:column; justify-content:center}
+.spot-name{font-family:var(--disp); font-weight:700; font-size:clamp(34px,5vw,52px); line-height:.95; margin:0; letter-spacing:.02em; text-transform:uppercase; color:#f7f4ff; text-shadow:0 0 12px rgba(34,211,238,.35)}
+.spot-handle{display:inline-block; margin-top:8px; font-family:var(--mono); font-size:16px; letter-spacing:.04em; color:var(--pink-hi); text-shadow:0 0 9px rgba(244,113,182,.45)}
+.spot-handle:hover{color:#fbcfe8}
+.spot-bio{font-size:14.5px; line-height:1.65; color:var(--ink2); margin:14px 0 0}
+.spot-bio b{color:var(--ink)}
+.spot-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:22px}
+.follow-btn{display:inline-block; border:1px solid var(--pink); background:rgba(244,113,182,.16); color:var(--pink-hi); font-family:var(--mono); font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; padding:11px 18px; border-radius:999px; box-shadow:0 0 12px rgba(244,113,182,.35)}
+.follow-btn:hover{background:rgba(244,113,182,.3); color:#fdf2f8; text-decoration:none}
+.spot-jump{appearance:none; border:1px solid var(--cyan); background:rgba(34,211,238,.08); color:var(--cyan-hi); font-family:var(--mono); font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; padding:11px 18px; border-radius:999px; cursor:pointer; box-shadow:0 0 10px rgba(34,211,238,.22)}
+.spot-jump:hover{background:rgba(34,211,238,.22); color:#ecfeff}
+@media(max-width:860px){
+  .spot-panel{grid-template-columns:1fr}
+}
+
+/* CLOSING NOTE — end of the last spread */
+.closing{margin:26px 0 34px; border:1px solid rgba(244,113,182,.45); border-top:2px solid rgba(34,211,238,.55); border-radius:12px; background:linear-gradient(140deg, rgba(88,20,66,.5), rgba(20,10,44,.85) 60%, rgba(10,26,44,.8)); padding:22px 24px; box-shadow:0 0 20px rgba(244,113,182,.1), inset 0 0 28px rgba(13,7,22,.5)}
+.closing h3{font-family:var(--mono); font-weight:400; letter-spacing:.14em; text-transform:uppercase; font-size:12px; color:var(--amber-hi); margin:0 0 8px; text-shadow:0 0 8px rgba(251,191,36,.45)}
+.closing p{margin:0 0 6px; font-size:14px; line-height:1.65; color:var(--ink2); max-width:72ch}
+.btn{display:inline-block; background:rgba(34,211,238,.14); color:var(--cyan-hi) !important; text-decoration:none; padding:11px 18px; border-radius:999px; font-family:var(--sans); font-weight:600; letter-spacing:.08em; text-transform:uppercase; font-size:12px; margin-top:10px; border:1px solid var(--cyan); box-shadow:0 0 12px rgba(34,211,238,.3)}
+.btn:hover{background:rgba(34,211,238,.28); color:#ecfeff !important; text-decoration:none; box-shadow:0 0 18px rgba(34,211,238,.5)}
+.colophon{padding:0 0 30px; text-align:center; font-family:var(--mono); letter-spacing:.1em; text-transform:uppercase; font-size:11px; color:var(--ink3); line-height:2}
+.colophon b{color:var(--cyan-hi); font-weight:400}
+
+@media(max-width:860px){
+  .day-grid{grid-template-columns:1fr 1fr}
+  .cover-lines{grid-template-columns:1fr}
+  .cover-bullets{display:none}
+  .feature.split{grid-template-columns:1fr}
+  .flyer-fig img{height:auto; flex:none}
+  .day-count{margin-left:0}
+}
+@media(max-width:560px){
+  .day-grid{grid-template-columns:1fr}
+  .fb-label b{font-size:15px}
+  .fb-btn{padding:8px 11px; font-size:11px}
+  .cover-screen{min-height:74vh}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .ticker-track{animation:none}
+  .page.active,.page.back.active{animation:none}
+}
+</style>
+</head>
+<body>
+
+<div class="ticker" aria-hidden="true"><div class="ticker-track" id="tickerTrack"></div></div>
+
+<!-- FLIP BAR -->
+<div class="flipbar"><div class="wrap">
+  <div class="fb-main">
+    <button class="fb-btn" id="prevBtn" type="button" aria-label="Previous spread">‹ Prev</button>
+    <div class="fb-label"><b id="fbTitle">Cover</b><span id="fbCount">Spread 1 of 14</span>
+      <div class="fb-tools">
+        <button id="daysToggle" type="button" aria-expanded="false" aria-controls="dayChips">Days ▾</button>
+        <button id="filterToggle" type="button" aria-expanded="false" aria-controls="filterRow">Filter ▾</button>
+      </div>
+    </div>
+    <button class="fb-btn" id="nextBtn" type="button" aria-label="Next spread">Next ›</button>
+  </div>
+  <nav class="fb-days" id="dayChips" aria-label="Jump to a day"></nav>
+  <div class="fb-filters" id="filterRow" role="group" aria-label="Filter events">
+    <button class="active" data-filter="all" type="button">All Events</button>
+    <button data-filter="meet" type="button">Car Meets</button>
+    <button data-filter="halloween" type="button">Halloween</button>
+    <button data-filter="launch" type="button">City / Server Launches</button>
+    <button data-filter="contest" type="button">Contests &amp; Races</button>
+    <button data-filter="fivem" type="button">FiveM</button>
+    <button data-filter="console" type="button">PS / Xbox</button>
+  </div>
+</div></div>
+
+<main class="wrap" id="stage">
+
+  <!-- PAGE 1 — COVER -->
+  <section class="page active" data-title="Cover" aria-label="Cover">
+    <div class="cover-screen">
+      <img src="assets/city.webp" alt="Custom cars and bikes lined up on a neon-lit wet street at night in Los Santos style"/>
+      <div class="cover-shade"></div>
+      <div class="cover-top"><span class="issue-chip">Issue 01 — Halloween Week</span><span>Oct 23 – Nov 24</span></div>
+      <div class="cover-mid">
+        <p class="logo-kicker">GTA RP Event Magazine</p>
+        <h1 class="logo">THE <span class="slant">LINEUP</span></h1>
+        <div class="logo-sub">
+          <span class="pill hot">Vol. 01 · No. 01</span>
+          <span class="pill cool">Fri Oct 23, 2026</span>
+          <span class="pill">36 events · one listing each</span>
+          <span class="pill">From the Notice Board desk</span>
+        </div>
+      </div>
+      <div class="cover-lines">
+        <div>
+          <span class="cover-kicker">Cover Story — Tonight in Los Santos</span>
+          <div class="cover-head">Twelve listings.<br>One Friday <i>night.</i></div>
+          <p class="cover-dek">Halloween takes the calendar this week — eight timed events tonight, from the 3 PM costume show to a 9:30 PM opening, plus four more with the time still to come. Flip through day by day: a snowmobile race in North Yankton, farewell cruises, and new cities opening their gates through November 24.</p>
+        </div>
+        <ul class="cover-bullets">
+          <li><b>Inside</b>Dart Gang’s Best Build contest — 30 minutes, winner takes the lot</li>
+          <li><b>Road Trip</b>Snowmobiles at the North Yankton bank, Saturday 11 AM PT</li>
+          <li><b>Save the Date</b>The Last Ride — Nov 18, a GTA V sendoff</li>
+        </ul>
+      </div>
+    </div>
+    <div class="cover-foot">
+      <span class="caption">Cover: The lineup forms up — customs, classics &amp; bikes under the neon<br>Photos: Lineup studio illustrations · WSP City flyer: @wsp_city_roleplay</span>
+      <button class="open-btn" id="openBtn" type="button">Open the issue ›</button>
+    </div>
+    <p class="flip-hint">Flip with Prev / Next, arrow keys, or a swipe — Days jumps you straight to a date</p>
+  </section>
+
+  <!-- Day spreads are built by the script below -->
+
+</main>
+
+<script>
+var TICKER='TONIGHT <b>3:00 PM</b> HALLOWEEN CAR/COSTUME SHOW — @RAYVEENYT <i>◆</i> <b>5:00 PM</b> GTA CAR MEET — @MONEYBOYTRAY1 <i>◆</i> <b>5:30 PM</b> HALLOWEEN CAR &amp; BIKE MEET — PLAYSTATION <i>◆</i> <b>6:00 PM</b> BAD DECISIONS AT BENNY’S <i>◆</i> <b>8:00 PM</b> TEXAS ROLEPLAY LAUNCH <i>◆</i> <b>9:00 PM</b> PAVUNA RP INAUGURATION + MY HALLOWEEN FASHION SHOW <i>◆</i> <b>9:30 PM</b> LAST STORY FTW OPENING <i>◆</i> SAT <b>11:00 AM</b> SNOWMOBILE RACE — NORTH YANKTON <i>◆</i> SAT <b>7:00 PM</b> DART GANG BEST BUILD CONTEST <i>◆</i> SAT <b>8:30 PM</b> WSP CITY ROLEPLAY INAUGURATION <i>◆</i> SAT <b>9:00 PM</b> NIGHTMARE ON JET STREET <i>◆</i> ';
+document.getElementById('tickerTrack').innerHTML='<span>'+TICKER+'</span><span>'+TICKER+'</span>';
+
+var EVENTS=[
+ {date:"FRI OCT 23",time:"3:00 PM PT",title:"Annual Halloween GTA 5 Car/Costume Show",host:"@rayveenyt",where:"Location on flyer",platform:"Xbox",desc:"The night's opener — cars and costumes both on show.",cats:["meet","halloween","console"]},
+ {date:"FRI OCT 23",time:"5:00 PM",title:"GTA Car Meet",host:"@moneyboytray1",where:"Host PLURAL_MONEYBOY1",platform:"All cars & crews welcome",desc:"The early Friday roll-in. Organizer didn't list a time zone.",cats:["meet"]},
+ {date:"FRI OCT 23",time:"5:30 PM PT",title:"Halloween Car & Bike Meet",host:"@wifeyanna11",where:"8:30 PM Eastern",platform:"PlayStation",desc:"Cars and bikes together for Halloween week. Spooky builds welcome.",cats:["meet","halloween","console"]},
+ {date:"FRI OCT 23",time:"6:00–7:00 PM PT",title:"Bad Decisions Car Meet — Halloween Edition",host:"@pigman_redemption",where:"Benny's",platform:"PlayStation",desc:"The cover story. One tight hour at Benny's, 9:00 PM EST.",cats:["meet","halloween","console"]},
+ {date:"FRI OCT 23",time:"8:00 PM PT",title:"Texas Roleplay — Official Launch",host:"@texasroleplayoficial",where:"Texas Roleplay",platform:"Launch night",desc:"A new state opens its doors. Launch-night lobbies fill fast.",cats:["launch"]},
+ {date:"FRI OCT 23",time:"9:00 PM PT",title:"Pavuna Roleplay — Inauguration",host:"@pavuna.rp",where:"Pavuna RP",platform:"Launch night",desc:"Opening night for the new city.",cats:["launch"]},
+ {date:"FRI OCT 23",time:"9:00 PM",title:"My Halloween Fashion Show",host:"@mimi628_1",where:"Runway — see host",platform:"PlayStation",desc:"Costumes on the runway. Organizer didn't list a time zone.",cats:["halloween","console"]},
+ {date:"FRI OCT 23",time:"9:30 PM",title:"Last Story FTW — Opening",host:"@laststoryroleplay",where:"Last Story RP",platform:"FiveM",desc:"The night's last opening. Organizer didn't list a time zone.",cats:["launch","fivem"]},
+ {date:"FRI OCT 23",time:"TIME TBA",title:"Northbridge RP — Launch",host:"@northbridge.rp",where:"Northbridge RP",platform:"FiveM",desc:"New city, opening day. Time TBA — watch the host for the hour.",cats:["launch","fivem"]},
+ {date:"FRI OCT 23",time:"TIME TBA",title:"Clean Culture Meet",host:"@jankyxbl",where:"Location on flyer",platform:"Xbox",desc:"The weekly regular — runs Friday and Saturday, every week.",cats:["meet","console"]},
+ {date:"FRI OCT 23",time:"TIME TBA",title:"LaNinna Family Anniversary Get Together",host:"@laninna.syndicate",where:"Location on flyer",platform:"Drop Tops & Old Schools only",desc:"An anniversary get together — drop tops and old schools only, all welcome. Time TBA.",cats:["meet"]},
+ {date:"FRI OCT 23",time:"TIME TBA",title:"Alpha State Roleplay — Grand Opening",host:"@alpha_stateroleplay",where:"Alpha State RP",platform:"FiveM",desc:"Another new state opens tonight. Time TBA — watch the host.",cats:["launch","fivem"]},
+ {date:"SAT OCT 24",time:"10:00 AM PT",title:"Fleck City Roleplay Inauguration",host:"@fleckgaming.oficial",where:"Fleck City",platform:"FiveM",desc:"Saturday starts early — a brand-new city opens its gates.",cats:["launch","fivem"]},
+ {date:"SAT OCT 24",time:"11:00 AM PT",title:"DanaVerso Community Meeting + Snowmobile Race",host:"@danaversorp",where:"North Yankton bank",platform:"3:00 PM Brasília",desc:"Community meeting, then sleds on snow. The week's wild-card grid.",cats:["meet","contest"]},
+ {date:"SAT OCT 24",time:"1:00 PM PT",title:"Chiraq Chronicles Chapter 1 Grand Opening",host:"@chiraqchronicles",where:"Chiraq RP",platform:"FiveM",desc:"Chapter 1 opens Saturday afternoon — a brand-new city story begins.",cats:["launch","fivem"]},
+ {date:"SAT OCT 24",time:"4:00 PM PT",title:"SixSocietyRC — Saturday Car Meet",host:"@sixsocietyrc",where:"Location on flyer",platform:"Weekly meetup",desc:"The standing Saturday meetup, right in the middle of the day's runs.",cats:["meet"]},
+ {date:"SAT OCT 24",time:"6:00 PM",title:"Rust Roleplay — Grand Opening",host:"@rust_roleplay",where:"Rust Roleplay",platform:"Launch night",desc:"Opening night. Organizer didn't list a time zone.",cats:["launch"]},
+ {date:"SAT OCT 24",time:"7:00–7:30 PM PT",title:"Dart Gang Car Meet",host:"@slimebelief765",where:"10:00–10:30 PM EST",platform:"PSN",desc:"Thirty minutes, one Best Build contest. Bring your finished car.",cats:["meet","contest","console"]},
+ {date:"SAT OCT 24",time:"8:30 PM",title:"WSP City Roleplay — Inauguration",host:"@wsp_city_roleplay",where:"WSP City",platform:"Server launch",desc:"Inauguration night — the official flyer leads this spread. Organizer didn't list a time zone.",cats:["launch"]},
+ {date:"SAT OCT 24",time:"9:00 PM",title:"Nightmare on Jet Street",host:"@jet_stillhavin_gtav",where:"Jet Street",platform:"PlayStation",desc:"Costumes mandatory, and there's a costume contest. Organizer didn't list a time zone.",cats:["meet","halloween","contest","console"]},
+ {date:"SAT OCT 24",time:"TIME TBA",title:"Dystopia RP — Official Launch",host:"@dystopiaroleplay",where:"Dystopia RP",platform:"FiveM",desc:"A new city opens its gates. Launch-day lobbies fill fast.",cats:["launch","fivem"]},
+ {date:"SAT OCT 24",time:"TIME TBA",title:"Richh Life RP — Launch",host:"Richh Life RP",where:"Richh Life RP",platform:"Launch day",desc:"One more new city for the Saturday pile-up. Time TBA.",cats:["launch"]},
+ {date:"SAT OCT 24",time:"11:30 PM PT",title:"Brasil Roleplay Moto Event (Edição 2)",host:"@tavaresbrp",where:"Location on flyer",platform:"Motorcycles",desc:"The late one — edition 2 of the moto event, bikes and a party to close out Saturday.",cats:["meet"]},
+ {date:"SUN OCT 25",time:"2:00 PM PT",title:"Hellfire vs Buffalo STX Carmeet",host:"@queensmokerx",where:"Location on flyer",platform:"Xbox",desc:"Two crews line up for the Sunday carmeet.",cats:["meet","console"]},
+ {date:"MON OCT 26",time:"TIME TBA",title:"Winx RP City Launch",host:"@winxroleplaygg",where:"Winx RP",platform:"FiveM",desc:"A Monday launch to open the week. Time TBA.",cats:["launch","fivem"]},
+ {date:"TUE OCT 27",time:"6:00 PM PT",title:"After Hours Car Meet",host:"@numenmotorclub",where:"Location on flyer",platform:"PlayStation",desc:"Tuesday's one timed listing — an after-hours lot.",cats:["meet","console"]},
+ {date:"TUE OCT 27",time:"TIME TBA",title:"Back In The Day LA 90s RP Launch",host:"@montanaa303",where:"Location on flyer",platform:"FiveM",desc:"A new 90s-flavoured LA city launches. Time TBA — check the host.",cats:["launch","fivem"]},
+ {date:"THU OCT 29",time:"8:00 PM",title:"Focus Gaming — Community Event Night",host:"@focusgamingcommunity",where:"Focus Gaming",platform:"Community night",desc:"An evening with the Focus Gaming community. Zone as listed by the organizer.",cats:["meet"]},
+ {date:"SAT OCT 31",time:"4:00 PM PT",title:"NG NoGrau RP — City Inauguration",host:"@nograurp",where:"NoGrau RP City",platform:"FiveM",desc:"Halloween night launch. Organizer didn't list a time zone on the flyer.",cats:["launch","halloween","fivem"]},
+ {date:"FRI NOV 6",time:"TIME TBA",title:"Paradise RP — Launch",host:"@telasconews",where:"Paradise RP",platform:"Launch day",desc:"Launch announced by TelaSco News. Time TBA.",cats:["launch"]},
+ {date:"SAT NOV 7",time:"6:00 PM EST",title:"Farewell Los Santos — Cruise & Meet",host:"@forzatogapher420",where:"Los Santos",platform:"Farewell run",desc:"A goodbye lap of the city before the move.",cats:["meet"]},
+ {date:"SAT NOV 7",time:"TIME TBA",title:"Los Santos Auto Club — Car Meet",host:"Los Santos Auto Club",where:"Time & spot TBA",platform:"Car meet",desc:"The Auto Club's meet. Time TBA — check the host.",cats:["meet"]},
+ {date:"MON NOV 9",time:"TIME TBA",title:"Tropical City RP — Launch",host:"@tropicalcitygg",where:"Tropical City RP",platform:"Launch day",desc:"A new city with a warmer forecast. Time TBA.",cats:["launch"]},
+ {date:"TUE NOV 17",time:"12:00 PM PT",title:"One Last Ride Before GTA 6 — Cruise",host:"One Last Ride",where:"Los Santos",platform:"Farewell cruise",desc:"One more lap of Los Santos before the next era.",cats:["meet"]},
+ {date:"WED NOV 18",time:"TIME TBA",title:"The Last Ride — Car Meet",host:"@bby_k.26",where:"Time & spot TBA",platform:"GTA V Sendoff",desc:"Another GTA V sendoff meet — one more run for the road.",cats:["meet"]},
+ {date:"TUE NOV 24",time:"TIME TBA",title:"Paz City — Server Inauguration",host:"@cidadepazcity",where:"Paz City",platform:"FiveM",desc:"Paz City opens. Time TBA on the flyer — watch the host for the hour.",cats:["launch","fivem"]}
+];
+
+/* Day spreads, in diary order */
+var DAYS=[
+ {key:"FRI OCT 23",num:"23",dow:"Friday",full:"Friday, October 23",chip:"Fri 23",badge:"Tonight",note:"Halloween week opens with the biggest night of the issue — eight listings against the clock, four more still to set a time."},
+ {key:"SAT OCT 24",num:"24",dow:"Saturday",full:"Saturday, October 24",chip:"Sat 24",badge:"",note:"Eleven listings — snowmobiles in the morning, a Best Build sprint at dusk, and launches stacked all night."},
+ {key:"SUN OCT 25",num:"25",dow:"Sunday",full:"Sunday, October 25",chip:"Sun 25",badge:"",note:"One meet, two crews — the week exhales."},
+ {key:"MON OCT 26",num:"26",dow:"Monday",full:"Monday, October 26",chip:"Mon 26",badge:"",note:"A Monday launch to open the week."},
+ {key:"TUE OCT 27",num:"27",dow:"Tuesday",full:"Tuesday, October 27",chip:"Tue 27",badge:"",note:"Two listings — one timed after-hours lot, one 90s RP launch."},
+ {key:"THU OCT 29",num:"29",dow:"Thursday",full:"Thursday, October 29",chip:"Thu 29",badge:"",note:"Focus Gaming opens its doors for a community night."},
+ {key:"SAT OCT 31",num:"31",dow:"Saturday",full:"Saturday, October 31",chip:"Sat 31",badge:"Halloween",note:"Halloween night itself — a brand-new city cuts the ribbon."},
+ {key:"FRI NOV 6",num:"06",dow:"Friday",full:"Friday, November 6",chip:"Nov 6",badge:"",note:"Paradise RP touches down."},
+ {key:"SAT NOV 7",num:"07",dow:"Saturday",full:"Saturday, November 7",chip:"Nov 7",badge:"",note:"A farewell lap of Los Santos, plus the Auto Club's meet."},
+ {key:"MON NOV 9",num:"09",dow:"Monday",full:"Monday, November 9",chip:"Nov 9",badge:"",note:"Tropical City opens its gates."},
+ {key:"TUE NOV 17",num:"17",dow:"Tuesday",full:"Tuesday, November 17",chip:"Nov 17",badge:"",note:"One last ride before GTA 6."},
+ {key:"WED NOV 18",num:"18",dow:"Wednesday",full:"Wednesday, November 18",chip:"Nov 18",badge:"",note:"The Last Ride — a GTA V sendoff."},
+ {key:"TUE NOV 24",num:"24",dow:"Tuesday",full:"Tuesday, November 24",chip:"Nov 24",badge:"Last spread",note:"Paz City closes the diary — the final listing of the issue."}
+];
+
+/* Photo-led features that lead their day's spread, keyed by event title */
+var FEATURES={
+ "Bad Decisions Car Meet — Halloween Edition":{
+   img:"assets/halloween.webp",alt:"Bad Decisions Halloween meet flyer artwork: Halloween car meet at night with a black hearse, pumpkin lights and fog",
+   cap:"Flyer artwork for the meet",head:"Bad Decisions <span>at Benny’s</span>",
+   body:"<p>The headline act of Halloween week takes over Benny’s for one tight hour. One hour is the point — no drifting start, no lot half-empty at midnight. Roll in built, park up, and let the hearse do the talking.</p><div class=\"pull\">One hour, one lot, every build on show — that’s how a Halloween meet should run.”</div><p>It stacks perfectly behind the 5:30 PM Halloween Car &amp; Bike Meet, so the night runs as a crawl: early meet, bikes, then Benny’s under the lights to close Friday out.</p>",
+   facts:"<div><b>When</b>Fri Oct 23, 6–7 PM PT</div><div><b>Where</b>Benny’s</div><div><b>Platform</b>PlayStation</div><div><b>Also listed as</b>9:00 PM EST</div>"},
+ "DanaVerso Community Meeting + Snowmobile Race":{
+   img:"assets/snow.webp",alt:"DanaVerso flyer artwork: trucks and snowmobiles lined up in snow outside a stone bank building in North Yankton",
+   cap:"Flyer artwork for the meet",head:"Snow Before <span>Halloween</span>",
+   body:"<p>DanaVerso flips the season on Saturday morning — a community meeting plus a snowmobile race at the North Yankton bank (3:00 PM Brasília). Trucks on snow tires, sleds on the line, and the strangest grid of the week.</p><p>It’s the only daytime feature in this issue, and the only one where the dress code is a parka. If you only make one road trip this week, make it this one.</p>",
+   facts:"<div><b>When</b>Sat Oct 24, 11 AM PT</div><div><b>Where</b>North Yankton bank</div><div><b>Format</b>Meet + snowmobile race</div>"},
+ "Dart Gang Car Meet":{
+   img:"assets/bennys.webp",alt:"Dart Gang Best Build flyer artwork: candy-red lowrider on hydraulics inside a neon-lit custom garage",
+   cap:"Flyer artwork for the meet",head:"30 Minutes to Be <span>the Best Build</span>",
+   body:"<p>Dart Gang’s meet is a sprint, not a cruise — a half-hour window and a Best Build contest judged on the lot. No time to re-spray in the back. What you roll in with is what gets scored.</p><p>It lands in a stacked Saturday night — WSP City’s inauguration follows at 8:30 PM, just below. Pick your lane: contest lot or brand-new city.</p>",
+   facts:"<div><b>When</b>Sat Oct 24, 7–7:30 PM PT</div><div><b>Where</b>PSN</div><div><b>Prize format</b>Best Build contest</div>"},
+ "WSP City Roleplay — Inauguration":{
+   img:"assets/wsp-flyer.jpg",alt:"WSP City Roleplay official flyer: inauguration rescheduled to Saturday 24/10, blue neon city artwork",
+   cap:"The official flyer, as posted",head:"WSP City <span>Opens Saturday</span>",
+   body:"<p>The launch moved once already — this flyer is the official notice, pushing the inauguration to Saturday, October 24 while the last adjustments land — and it lands at 8:30 PM. The flyer lists no time zone, so set your clock by the host’s page, not ours.</p><p>A brand-new city on a Saturday night fills its first lobby fast. If WSP is your move this weekend, this is the one to be early for.</p>",
+   facts:"<div><b>When</b>Sat Oct 24, 8:30 PM</div><div><b>Time zone</b>Not listed by organizer</div><div><b>Format</b>Server inauguration</div>"}
+};
+
+/* The organizer's actual flyer post for each event, as recorded on the calendar */
+var POSTS={
+ "Annual Halloween GTA 5 Car/Costume Show":"https://www.instagram.com/p/DerzXIAOVV5/",
+ "GTA Car Meet":"https://www.instagram.com/p/De00TB6tKJU/",
+ "Halloween Car & Bike Meet":"https://www.instagram.com/p/DezdhvRRrLf/",
+ "Bad Decisions Car Meet — Halloween Edition":"https://www.instagram.com/p/DeYARBSI_nV/",
+ "Texas Roleplay — Official Launch":"https://www.instagram.com/p/DetGi8uhzZj/",
+ "Pavuna Roleplay — Inauguration":"https://www.instagram.com/p/Dem3i9-mt-O/",
+ "My Halloween Fashion Show":"https://www.instagram.com/reel/Dey-asrh0Qn/",
+ "Last Story FTW — Opening":"https://www.instagram.com/reel/DewvgPlx_QC/",
+ "Northbridge RP — Launch":"https://www.instagram.com/p/DeDHFBnoZp-/",
+ "Clean Culture Meet":"https://www.instagram.com/p/DeSkUtDSSRi/",
+ "LaNinna Family Anniversary Get Together":"https://www.instagram.com/p/DemlI9UPbA3/",
+ "Alpha State Roleplay — Grand Opening":"https://www.instagram.com/p/De1cd4ahQ5Q/",
+ "Fleck City Roleplay Inauguration":"https://www.instagram.com/reel/DemkvTToJQl/",
+ "DanaVerso Community Meeting + Snowmobile Race":"https://www.instagram.com/reel/Dex5zYXOlPi/",
+ "Chiraq Chronicles Chapter 1 Grand Opening":"https://www.instagram.com/p/Dere0h-RE_E/",
+ "SixSocietyRC — Saturday Car Meet":"https://www.instagram.com/reel/DdjZybUOx7P/",
+ "Rust Roleplay — Grand Opening":"https://www.instagram.com/p/DevJjkEJs_3/",
+ "Dart Gang Car Meet":"https://www.instagram.com/p/De0Nb0XyTcM/",
+ "WSP City Roleplay — Inauguration":"https://www.instagram.com/reel/DeeEj1Ax04-/",
+ "Nightmare on Jet Street":"https://www.instagram.com/p/De1-yfvMbaZ/",
+ "Dystopia RP — Official Launch":"https://www.instagram.com/reel/DewUtbwJwzR/",
+ "Richh Life RP — Launch":"https://www.instagram.com/reel/DesrDYKOHYE/",
+ "Brasil Roleplay Moto Event (Edição 2)":"https://www.instagram.com/p/DehRj2slrxp/",
+ "Hellfire vs Buffalo STX Carmeet":"https://www.instagram.com/p/DeuJDRMiIB6/",
+ "Winx RP City Launch":"https://www.instagram.com/reel/Desm9pBvMHI/",
+ "After Hours Car Meet":"https://www.instagram.com/p/Deu0WxBx8VU/",
+ "Back In The Day LA 90s RP Launch":"https://www.instagram.com/p/DedinwlFLDR/",
+ "Focus Gaming — Community Event Night":"https://www.instagram.com/reel/DetyWozIkz5/",
+ "NG NoGrau RP — City Inauguration":"https://www.instagram.com/reel/DezSHbzx2Rg/",
+ "Paradise RP — Launch":"https://www.instagram.com/p/De15IzeCKQ9/",
+ "Farewell Los Santos — Cruise & Meet":"https://www.instagram.com/p/DezPxByT8vF/",
+ "Los Santos Auto Club — Car Meet":"https://www.instagram.com/p/DewYHwbzhYz/",
+ "Tropical City RP — Launch":"https://www.instagram.com/p/Deue593hhPg/",
+ "One Last Ride Before GTA 6 — Cruise":"https://www.instagram.com/reel/DesvpkMAEIA/",
+ "The Last Ride — Car Meet":"https://www.instagram.com/p/Dezs_urPW8n/",
+ "Paz City — Server Inauguration":"https://www.instagram.com/reel/DewrKUTR7Ct/"
+};
+
+function igLink(handle,label){
+  return '<a class="ig" href="https://www.instagram.com/'+handle.slice(1)+'/" target="_blank" rel="noopener">'+(label||handle)+'</a>';
+}
+function hostChip(h){
+  if(h.charAt(0)==='@'){
+    return '<a href="https://www.instagram.com/'+h.slice(1)+'/" target="_blank" rel="noopener" aria-label="Open '+h+' on Instagram">'+h+' ↗</a>';
+  }
+  return '<span>'+h+'</span>';
+}
+function matches(e,f){return f==='all'||e.cats.indexOf(f)>-1}
+
+function cardHTML(e,solo){
+  var flyer=POSTS[e.title]?'<a class="flyer-link" href="'+POSTS[e.title]+'" target="_blank" rel="noopener" aria-label="Open the original flyer post for '+e.title+' on Instagram">Flyer post ↗</a>':'';
+  return '<article class="event s-'+e.cats[0]+(solo?' solo':'')+'"><div class="date">'+e.time+'</div><h3>'+e.title+'</h3><p>'+e.desc+'</p><div class="meta">'+hostChip(e.host)+flyer+'<span>'+e.where+'</span><span>'+e.platform+'</span></div></article>';
+}
+function featureHTML(e,f){
+  var niceDate=e.date.split(' ').map(function(w,i){return i<2?w.charAt(0)+w.slice(1).toLowerCase():w}).join(' ');
+  var cap=f.cap+' by '+igLink(e.host)+' · '+niceDate+' · '+e.time+(POSTS[e.title]?' · <a class="ig" href="'+POSTS[e.title]+'" target="_blank" rel="noopener">Original flyer post ↗</a>':'');
+  var facts=f.facts+'<div><b>Host</b>'+(e.host.charAt(0)==='@'?igLink(e.host):e.host)+'</div>';
+  return '<article class="feature split"><figure class="flyer-fig"><img src="'+f.img+'" alt="'+f.alt+'"/><figcaption>'+cap+'</figcaption></figure><div class="feature-body"><h3>'+f.head+'</h3>'+f.body+'<div class="facts">'+facts+'</div></div></article>';
+}
+
+var CLOSING='<div class="closing"><h3>Get listed in the next issue</h3><p>Hosting a meet, launch or contest? The Lineup is built from the same watch as the GTA RP Event Calendar — dated flyers with a time, place and platform get picked up on the 12 AM / 12 PM runs. Weekly regulars riding along in this issue: <b>Clean Culture</b> (Fri &amp; Sat · '+igLink('@jankyxbl')+' · Xbox) and <b>SixSocietyRC</b> (Saturdays).</p><a class="btn" href="https://tinyurl.com/GTA-RP-EVENT-Calendar" target="_blank" rel="noopener">Open the Full Calendar →</a></div><div class="colophon"><b>The Lineup</b> — GTA RP Event Magazine · Issue 01 · Oct 23, 2026<br>From the @gtarpnoticeboard desk · Events as listed by their organizers · In-game RP events only</div>';
+
+/* Build one spread per day */
+var stage=document.getElementById('stage');
+DAYS.forEach(function(d,di){
+  var dayEvents=EVENTS.filter(function(e){return e.date===d.key});
+  var sec=document.createElement('section');
+  sec.className='page'; sec.setAttribute('data-title',d.full); sec.setAttribute('aria-label',d.full);
+  var badge=d.badge?'<span class="day-badge">'+d.badge+'</span>':'';
+  sec.innerHTML='<div class="day-head"><div class="day-num" aria-hidden="true">'+d.num+'</div><div class="day-meta"><p class="day-dow">'+d.dow+'</p><h2 class="day-full" tabindex="-1">'+d.full+badge+'</h2><p class="day-note">'+d.note+'</p></div><div class="day-count" data-count></div></div><div class="day-rule"></div><div data-body></div>'+(di===DAYS.length-1?CLOSING:'');
+  sec._day=d; sec._events=dayEvents;
+  stage.appendChild(sec);
+});
+
+/* HOST SPOTLIGHT spread — one organizer featured, sitting between the Saturday and Sunday spreads */
+var SPOT_HTML=
+ '<div class="spot-head"><p class="spot-kicker">Host Spotlight — One Organizer, Featured</p>'+
+ '<h2 class="spot-title" tabindex="-1">The host of <span>Saturday night</span></h2>'+
+ '<p class="spot-lede">Every issue, one organizer gets a spread of their own. First in the chair: the crew opening a brand-new city in the middle of Halloween week — and the only host whose official flyer runs in this issue.</p></div>'+
+ '<article class="spot-panel">'+
+ '<figure class="flyer-fig"><img src="assets/wsp-flyer.jpg" alt="WSP City Roleplay official flyer: inauguration rescheduled to Saturday 24/10, blue neon city artwork"/><figcaption>The official flyer, as posted by '+igLink('@wsp_city_roleplay')+' · <a class="ig" href="'+POSTS['WSP City Roleplay — Inauguration']+'" target="_blank" rel="noopener">Original flyer post ↗</a></figcaption></figure>'+
+ '<div class="spot-body">'+
+ '<h3 class="spot-name">WSP City Roleplay</h3>'+
+ '<a class="spot-handle" href="https://www.instagram.com/wsp_city_roleplay/" target="_blank" rel="noopener" aria-label="Open @wsp_city_roleplay on Instagram">@wsp_city_roleplay ↗</a>'+
+ '<p class="spot-bio">WSP City’s inauguration was set once, then moved — the flyer on this page is the official notice, pushing opening night to <b>Saturday, October 24 at 8:30 PM</b> while the last adjustments land. It closes a stacked Saturday: the Dart Gang’s Best Build sprint wraps an hour before, and WSP gets the rest of the night to itself.</p>'+
+ '<p class="spot-bio">The flyer lists no time zone, so run your clock off the host’s page, not ours. A brand-new city on a Saturday night fills its first lobby fast — the spotlight advice is simple: be early.</p>'+
+ '<div class="facts"><div><b>Their event</b>WSP City Roleplay — Inauguration</div><div><b>When</b>Sat Oct 24 · 8:30 PM</div><div><b>Format</b>Server inauguration</div><div><b>Time zone</b>Not listed by organizer</div></div>'+
+ '<div class="spot-actions"><a class="follow-btn" href="https://www.instagram.com/wsp_city_roleplay/" target="_blank" rel="noopener">Follow the host ↗</a><button class="spot-jump" id="spotJump" type="button">See their night — Sat 24 ›</button></div>'+
+ '</div></article>';
+var spotSec=document.createElement('section');
+spotSec.className='page';
+spotSec.setAttribute('data-title','Host Spotlight — WSP City Roleplay');
+spotSec.setAttribute('aria-label','Host spotlight: WSP City Roleplay');
+spotSec.innerHTML=SPOT_HTML;
+spotSec._shown=1;
+stage.insertBefore(spotSec, stage.children[3]);
+spotSec.querySelector('#spotJump').addEventListener('click',function(){goTo(2,false)});
+
+var pages=Array.prototype.slice.call(document.querySelectorAll('.page'));
+var dayChips=document.getElementById('dayChips');
+var chipEls=[];
+/* Collapsible chrome: the day strip and filters stay tucked away until asked for */
+var flipbarEl=document.querySelector('.flipbar');
+var daysToggle=document.getElementById('daysToggle'), filterToggle=document.getElementById('filterToggle');
+function setPanel(cls,btn,open){
+  flipbarEl.classList.toggle(cls,open);
+  btn.setAttribute('aria-expanded',open?'true':'false');
+}
+daysToggle.addEventListener('click',function(){
+  setPanel('open-days',daysToggle,!flipbarEl.classList.contains('open-days'));
+  setPanel('open-filters',filterToggle,false);
+});
+filterToggle.addEventListener('click',function(){
+  setPanel('open-filters',filterToggle,!flipbarEl.classList.contains('open-filters'));
+  setPanel('open-days',daysToggle,false);
+});
+
+function makeChip(label,pageIdx){
+  var b=document.createElement('button'); b.type='button'; b.textContent=label;
+  b.addEventListener('click',function(){goTo(pageIdx, pageIdx<current); setPanel('open-days',daysToggle,false)});
+  dayChips.appendChild(b); chipEls[pageIdx]=b; return b;
+}
+makeChip('Cover',0);
+DAYS.forEach(function(d,i){
+  makeChip(d.chip, i+1+(i>=2?1:0));
+  if(i===1){makeChip('Spotlight',3)}
+});
+
+var current=0, filter='all';
+var prevBtn=document.getElementById('prevBtn'), nextBtn=document.getElementById('nextBtn');
+var fbTitle=document.getElementById('fbTitle'), fbCount=document.getElementById('fbCount');
+
+function renderSpread(sec){
+  if(!sec._events) return;
+  var shown=sec._events.filter(function(e){return matches(e,filter)});
+  var body=sec.querySelector('[data-body]');
+  var feats=shown.filter(function(e){return FEATURES[e.title]});
+  var rest=shown.filter(function(e){return !FEATURES[e.title]});
+  var html='';
+  feats.forEach(function(e){html+=featureHTML(e,FEATURES[e.title])});
+  if(rest.length){
+    html+='<div class="day-grid">'+rest.map(function(e){return cardHTML(e, shown.length===1)}).join('')+'</div>';
+  }
+  if(!shown.length){
+    html='<div class="day-empty">Nothing in this lane on this day — flip on, or switch the filter back to All Events.</div>';
+  }
+  body.innerHTML=html;
+  sec.querySelector('[data-count]').textContent=shown.length+(shown.length===1?' event':' events')+(filter!=='all'?' · filtered':'');
+  sec._shown=shown.length;
+}
+function renderAll(){pages.forEach(renderSpread)}
+
+/* A spread stays in the flip order if it has anything showing; the cover always stays */
+function inPlay(i){return i===0||pages[i]._shown>0}
+function playList(){var r=[];for(var i=0;i<pages.length;i++){if(inPlay(i))r.push(i)}return r}
+
+function goTo(idx,back){
+  var list=playList();
+  if(list.indexOf(idx)===-1){idx=list[0]}
+  pages.forEach(function(p,i){p.classList.toggle('active',i===idx); p.classList.toggle('back',!!back&&i===idx)});
+  current=idx;
+  var pos=list.indexOf(idx);
+  fbTitle.textContent=idx===0?'Cover':pages[idx].getAttribute('data-title');
+  fbCount.textContent='Spread '+(pos+1)+' of '+list.length;
+  prevBtn.disabled=pos<=0; nextBtn.disabled=pos>=list.length-1;
+  chipEls.forEach(function(c,i){if(c){c.classList.toggle('on',i===idx); c.disabled=!inPlay(i)}});
+  window.scrollTo(0,0);
+  var h=pages[idx].querySelector('.day-full')||pages[idx].querySelector('.spot-title'); if(h){h.focus({preventScroll:true})}
+}
+function step(dir){
+  var list=playList(); var pos=list.indexOf(current);
+  var n=list[pos+dir]; if(n===undefined)return;
+  goTo(n, dir<0);
+}
+prevBtn.addEventListener('click',function(){step(-1)});
+nextBtn.addEventListener('click',function(){step(1)});
+document.getElementById('openBtn').addEventListener('click',function(){step(1)});
+document.addEventListener('keydown',function(ev){
+  if(ev.target.tagName==='INPUT'||ev.target.tagName==='TEXTAREA')return;
+  if(ev.key==='ArrowRight'){step(1)}
+  else if(ev.key==='ArrowLeft'){step(-1)}
+});
+var tx=null,ty=null;
+stage.addEventListener('touchstart',function(ev){var t=ev.changedTouches[0]; tx=t.clientX; ty=t.clientY},{passive:true});
+stage.addEventListener('touchend',function(ev){
+  if(tx===null)return;
+  var t=ev.changedTouches[0], dx=t.clientX-tx, dy=t.clientY-ty; tx=null;
+  if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.6){step(dx<0?1:-1)}
+},{passive:true});
+
+document.querySelectorAll('.fb-filters button').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.fb-filters button').forEach(function(x){x.classList.remove('active')});
+    b.classList.add('active');
+    filter=b.getAttribute('data-filter');
+    filterToggle.textContent=filter==='all'?'Filter ▾':'Filter: '+b.textContent+' ▾';
+    filterToggle.style.borderColor=filter==='all'?'':'var(--cyan)';
+    filterToggle.style.color=filter==='all'?'':'var(--cyan-hi)';
+    renderAll();
+    goTo(inPlay(current)?current:0, false);
+  });
+});
+
+renderAll();
+goTo(0,false);
+</script>
+</body>
+</html>
