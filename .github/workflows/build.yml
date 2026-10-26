@@ -1,0 +1,45 @@
+name: Build The Lineup
+
+# Rebuilds the magazine (index.html) from the public Google Calendar's
+# iCal feed and commits it back to main when it changed. No human in the
+# loop: the scheduled run keeps the page current on its own. The builder
+# is stdlib-only Python, so there is nothing to install.
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: lineup-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build the magazine from the public calendar feed
+        run: python3 ci_build.py
+
+      - name: Commit index.html if it changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No changes - the magazine is already current."
+          else
+            git commit -m "The Lineup — auto refresh"
+            git push
+          fi
