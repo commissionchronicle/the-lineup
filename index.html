@@ -281,8 +281,9 @@ a.ig:hover{color:#fbcfe8; text-decoration:underline; text-underline-offset:3px}
    flyer was fetched shows it as a framed figure under the title, linked
    to the flyer post; cards without one keep the link-only layout. */
 .event-flyer{display:block;margin:2px 0 4px;border:1px solid var(--cyan-soft);border-radius:10px;overflow:hidden;background:#05030d;box-shadow:0 0 14px rgba(34,211,238,.1)}
-.event-flyer a{display:block}
-.event-flyer img{display:block;width:100%;height:auto;max-height:460px;object-fit:contain;margin:0 auto}
+.event-flyer a{display:block;position:relative;overflow:hidden}
+.event-flyer img.flyer-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(18px) brightness(.6);transform:scale(1.1)}
+.event-flyer img.flyer-fg{position:relative;z-index:1;display:block;width:100%;height:auto;max-height:460px;object-fit:contain;margin:0 auto}
 </style>
 </head>
 <body>
@@ -1863,7 +1864,7 @@ function cardHTML(e,solo){
   var ei=EVENTS.indexOf(e);
   var post=POSTS[e.title+'|'+e.date];
   var flyer=post?'<a class="flyer-link" href="'+post+'" target="_blank" rel="noopener" aria-label="Open the original flyer post for '+e.title+' on Instagram">Flyer post ↗</a>':'';
-  var fig=(e.flyer&&post)?'<figure class="flyer-fig event-flyer"><a href="'+post+'" target="_blank" rel="noopener" aria-label="Open the original flyer post for '+e.title+' on Instagram"><img src="'+e.flyer+'" alt="'+e.title+'" loading="lazy"/></a></figure>':'';
+  var fig=(e.flyer&&post)?'<figure class="flyer-fig event-flyer"><a href="'+post+'" target="_blank" rel="noopener" aria-label="Open the original flyer post for '+e.title+' on Instagram"><img class="flyer-bg" src="'+e.flyer+'" alt="" aria-hidden="true" loading="lazy"/><img class="flyer-fg" src="'+e.flyer+'" alt="'+e.title+'" loading="lazy"/></a></figure>':'';
   return '<article class="event s-'+e.cats[0]+(solo?' solo':'')+'"><div class="date"><span class="tz-time" data-ei="'+ei+'">'+e.time+'</span></div><h3>'+e.title+'</h3>'+fig+'<p>'+e.desc+'</p><div class="meta">'+hostChip(e.host)+flyer+cdChip(e)+calBtn(e)+'<span>'+e.where+'</span><span>'+e.platform+'</span></div></article>';
 }
 
