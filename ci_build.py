@@ -1306,36 +1306,26 @@ def main():
          '<p class="flip-hint">Flip with Prev / Next, arrow keys, or a swipe — Hosts jumps you straight to an organizer</p>',
          "flip hint")
 
-    # Slim cover: masthead, one slim line, a one-line description, the
-    # start prompt. The stats paragraph, the Inside / New Cities / Save
-    # the Date index and the photo credits all leave the cover (credits
-    # move to the back page, in CLOSING above).
-    swap('<span class="issue-chip">Issue 01 — Halloween Week</span>',
-         f'<span class="issue-chip">Live Edition — Updated {day_label(today)}</span>', "chip")
-    swap('<span>Oct 23 – Nov 24</span>',
-         f'<span>{day_label(today)} – {day_label(last_day)}</span>', "range")
-    i = out.index('<div class="logo-sub">')
-    j = out.index('</div>', i) + len('</div>')
-    out = out[:i] + (f'<div class="logo-sub"><span class="pill">'
-                     f'{day_label(today)} – {day_label(last_day)} · {total} events · '
-                     f'{n_hosts} hosts</span></div>') + out[j:]
-    swap('<span class="cover-kicker">Cover Story — Tonight in Los Santos</span>', "", "cover kicker")
-    swap('<div class="cover-head">Twelve listings.<br>One Friday <i>night.</i></div>', "", "cover head")
-    i = out.index('<p class="cover-dek">')
-    j = out.index('</p>', i) + len('</p>')
-    out = out[:i] + ('<p class="cover-dek">Every GTA RP event, car meet and city opening '
-                     'on the Notice Board calendar — one page per host, soonest first.</p>') + out[j:]
-    i = out.index('<ul class="cover-bullets">')
-    j = out.index('</ul>', i) + len('</ul>')
-    out = out[:i] + out[j:]
-    i = out.index('<span class="caption">')
-    j = out.index('</span>', i) + len('</span>')
-    out = out[:i] + out[j:]
+    # Cover: page 1 is the Newsstand cover PHOTO carried in the template
+    # itself (words-free Halloween photo; the only chrome is the floating
+    # TAP TO OPEN chip).
+    # The old slim-cover surgery (chip / range / pills / dek swaps) is
+    # retired with the markup it targeted. Assert the photo cover is
+    # present so a template regression fails the build loudly.
+    assert out.count('class="cover-screen photo"') == 1, "cover section anchor"
+    assert out.count('src="assets/cover.webp"') == 1, "cover img anchor"
 
     # Inline the artwork from assets-inline.json (the CI equivalent of
     # inline-assets.py: the repo holds the data URIs as text, substituted
     # here exactly where the local flow substitutes them).
     asset_map = json.loads(ASSETS_JSON.read_text(encoding="utf-8"))
+    # The cover entry is keyed "cover" (not a path): substitute it only at
+    # the cover <img> so the bare word "cover" elsewhere in the document
+    # (CSS classes, object-fit, viewport-fit) is never touched.
+    cover_uri = asset_map.pop("cover", None)
+    if cover_uri:
+        assert out.count('src="assets/cover.webp"') == 1, "cover inlining anchor"
+        out = out.replace('src="assets/cover.webp"', f'src="{cover_uri}"')
     for rel, uri in asset_map.items():
         out = out.replace(rel, uri)
 

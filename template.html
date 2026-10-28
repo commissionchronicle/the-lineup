@@ -85,32 +85,15 @@ img{display:block; max-width:100%}
 .page.back.active{animation:flipBack .38s ease both}
 @keyframes flipBack{from{opacity:0; transform:translateX(-26px)}to{opacity:1; transform:none}}
 
-/* COVER SCREEN */
-.cover-screen{position:relative; margin:22px auto 0; border:1px solid var(--cyan-soft); border-top:2px solid rgba(244,113,182,.65); border-radius:14px; background:#000; overflow:hidden; box-shadow:0 0 22px rgba(34,211,238,.14), 0 0 46px rgba(232,121,249,.08); min-height:min(82vh,760px); display:flex; flex-direction:column}
-.cover-screen>img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.97}
-.cover-shade{position:absolute; inset:0; background:linear-gradient(180deg, rgba(9,4,20,.42) 0%, rgba(9,4,20,0) 30%, rgba(9,4,20,0) 52%, rgba(9,4,20,.94) 88%)}
-.cover-top{position:relative; display:flex; justify-content:space-between; gap:10px; padding:16px 18px; color:#fff; font-family:var(--mono); letter-spacing:.12em; text-transform:uppercase; font-size:11px; text-shadow:0 2px 12px rgba(0,0,0,.8)}
-.cover-top .issue-chip{background:rgba(225,29,72,.85); padding:5px 9px; border-radius:4px; border:1px solid rgba(251,113,133,.8); box-shadow:0 0 10px rgba(251,113,133,.45); text-shadow:none}
-.cover-mid{position:relative; padding:8px 20px 0}
-.logo-kicker{font-size:11px; font-weight:700; letter-spacing:.24em; text-transform:uppercase; color:var(--pink-hi); text-shadow:0 0 10px rgba(244,113,182,.55), 0 2px 10px rgba(0,0,0,.8); margin:0 0 4px}
-.logo{font-family:var(--disp); font-weight:700; line-height:.85; margin:0; font-size:clamp(58px,10.5vw,128px); letter-spacing:.02em; text-transform:uppercase; color:#f7f4ff; text-shadow:0 0 14px rgba(34,211,238,.5), 0 0 38px rgba(34,211,238,.28), 0 0 64px rgba(232,121,249,.3), 0 3px 18px rgba(0,0,0,.55)}
-.logo .slant{display:inline-block; color:var(--mag); text-shadow:0 0 14px rgba(232,121,249,.65), 0 0 42px rgba(232,121,249,.35), 0 3px 18px rgba(0,0,0,.55)}
-.logo-sub{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px}
-.pill{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; border:1px solid var(--line); border-radius:999px; padding:6px 12px; background:rgba(13,7,22,.82); color:var(--ink2)}
-.pill.hot{border-color:rgba(244,113,182,.65); color:var(--pink-hi); background:rgba(244,113,182,.08); box-shadow:0 0 9px rgba(244,113,182,.25)}
-.pill.cool{border-color:rgba(34,211,238,.6); color:var(--cyan-hi); background:rgba(34,211,238,.08); box-shadow:0 0 9px rgba(34,211,238,.25)}
-.cover-lines{position:relative; margin-top:auto; display:grid; grid-template-columns:1.25fr .75fr; gap:18px; padding:20px; color:#fff; align-items:end}
-.cover-kicker{display:inline-block; background:rgba(251,191,36,.14); color:var(--amber-hi); border:1px solid rgba(251,191,36,.7); font-family:var(--mono); letter-spacing:.12em; text-transform:uppercase; font-size:11px; padding:5px 10px; border-radius:4px; box-shadow:0 0 10px rgba(251,191,36,.3)}
-.cover-head{font-family:var(--disp); font-weight:700; font-size:clamp(42px,7vw,78px); line-height:.9; margin:12px 0 8px; letter-spacing:.02em; text-transform:uppercase; color:#f7f4ff; text-shadow:0 0 16px rgba(34,211,238,.55), 0 0 44px rgba(34,211,238,.3)}
-.cover-head i{color:var(--pink-hi); font-style:normal; text-shadow:0 0 16px rgba(244,113,182,.7), 0 0 44px rgba(244,113,182,.35)}
-.cover-dek{font-size:15px; line-height:1.55; max-width:54ch; color:var(--ink2); margin:0}
-.cover-bullets{list-style:none; margin:0; padding:0; display:grid; gap:10px}
-.cover-bullets li{background:rgba(13,7,24,.78); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:13px; line-height:1.45; color:var(--ink2)}
-.cover-bullets b{display:block; font-family:var(--mono); letter-spacing:.12em; text-transform:uppercase; font-size:10.5px; font-weight:400; color:var(--cyan-hi); margin-bottom:2px; text-shadow:0 0 8px rgba(34,211,238,.5)}
-.open-btn{appearance:none; border:1px solid var(--pink); background:rgba(244,113,182,.14); color:var(--pink-hi); font-family:var(--mono); font-size:13px; letter-spacing:.1em; text-transform:uppercase; padding:13px 22px; border-radius:999px; cursor:pointer; box-shadow:0 0 14px rgba(244,113,182,.35)}
-.open-btn:hover{background:rgba(244,113,182,.3); color:#fdf2f8}
-.cover-foot{display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; padding:14px 4px 30px}
-.cover-foot .caption{font-size:11px; color:var(--ink3); font-family:var(--mono); letter-spacing:.06em; text-transform:uppercase; line-height:1.7}
+/* COVER SCREEN — page 1 is the Newsstand cover PHOTO (Halloween,
+   words-free, approved 2026-10-28): the cover page is just the framed
+   photo plus a floating TAP TO OPEN chip (the chip keeps id="openBtn" —
+   the page script wires it to step(1)). */
+.cover-screen{position:relative; margin:22px auto 0; border:1px solid var(--cyan-soft); border-top:2px solid rgba(244,113,182,.65); border-radius:14px; background:#000; overflow:hidden; box-shadow:0 0 22px rgba(34,211,238,.14), 0 0 46px rgba(232,121,249,.08)}
+.cover-screen.photo{width:min(100%,70vh); aspect-ratio:4/5}
+.cover-screen.photo>img{display:block; width:100%; height:100%; object-fit:contain}
+.open-chip{position:absolute; left:50%; bottom:16px; transform:translateX(-50%); z-index:3; appearance:none; border:1px solid var(--pink); background:rgba(13,7,22,.85); color:var(--pink-hi); font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; padding:10px 18px; border-radius:999px; cursor:pointer; box-shadow:0 0 14px rgba(244,113,182,.4); white-space:nowrap}
+.open-chip:hover{background:rgba(244,113,182,.3); color:#fdf2f8}
 .flip-hint{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink3); text-align:center; padding:0 0 26px}
 
 /* DAY SPREAD HEAD — huge day numeral */
@@ -197,8 +180,6 @@ a.ig:hover{color:#fbcfe8; text-decoration:underline; text-underline-offset:3px}
 
 @media(max-width:860px){
   .day-grid{grid-template-columns:1fr 1fr}
-  .cover-lines{grid-template-columns:1fr}
-  .cover-bullets{display:none}
   .feature.split{grid-template-columns:1fr}
   .flyer-fig img{height:auto; flex:none}
   .day-count{margin-left:0}
@@ -207,7 +188,6 @@ a.ig:hover{color:#fbcfe8; text-decoration:underline; text-underline-offset:3px}
   .day-grid{grid-template-columns:1fr}
   .fb-label b{font-size:15px}
   .fb-btn{padding:8px 11px; font-size:11px}
-  .cover-screen{min-height:74vh}
 }
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
@@ -248,36 +228,9 @@ a.ig:hover{color:#fbcfe8; text-decoration:underline; text-underline-offset:3px}
 
   <!-- PAGE 1 — COVER -->
   <section class="page active" data-title="Cover" aria-label="Cover">
-    <div class="cover-screen">
-      <img src="assets/city.webp" alt="Custom cars and bikes lined up on a neon-lit wet street at night in Los Santos style"/>
-      <div class="cover-shade"></div>
-      <div class="cover-top"><span class="issue-chip">Issue 01 — Halloween Week</span><span>Oct 23 – Nov 24</span></div>
-      <div class="cover-mid">
-        <p class="logo-kicker">GTA RP Event Magazine</p>
-        <h1 class="logo">THE <span class="slant">LINEUP</span></h1>
-        <div class="logo-sub">
-          <span class="pill hot">Vol. 01 · No. 01</span>
-          <span class="pill cool">Fri Oct 23, 2026</span>
-          <span class="pill">36 events · one listing each</span>
-          <span class="pill">From the Notice Board desk</span>
-        </div>
-      </div>
-      <div class="cover-lines">
-        <div>
-          <span class="cover-kicker">Cover Story — Tonight in Los Santos</span>
-          <div class="cover-head">Twelve listings.<br>One Friday <i>night.</i></div>
-          <p class="cover-dek">Halloween takes the calendar this week — eight timed events tonight, from the 3 PM costume show to a 9:30 PM opening, plus four more with the time still to come. Flip through day by day: a snowmobile race in North Yankton, farewell cruises, and new cities opening their gates through November 24.</p>
-        </div>
-        <ul class="cover-bullets">
-          <li><b>Inside</b>Dart Gang’s Best Build contest — 30 minutes, winner takes the lot</li>
-          <li><b>Road Trip</b>Snowmobiles at the North Yankton bank, Saturday 11 AM PT</li>
-          <li><b>Save the Date</b>The Last Ride — Nov 18, a GTA V sendoff</li>
-        </ul>
-      </div>
-    </div>
-    <div class="cover-foot">
-      <span class="caption">Cover: The lineup forms up — customs, classics &amp; bikes under the neon<br>Photos: Lineup studio illustrations · WSP City flyer: @wsp_city_roleplay</span>
-      <button class="open-btn" id="openBtn" type="button">Open the issue ›</button>
+    <div class="cover-screen photo">
+      <img src="assets/cover.webp" alt="Halloween night in Los Santos — black classics with magenta and cyan underglow, glowing green jack-o'-lanterns, spider webs and fog on a wet neon street"/>
+      <button class="open-chip" id="openBtn" type="button">Tap to open →</button>
     </div>
     <p class="flip-hint">Flip with Prev / Next, arrow keys, or a swipe — Days jumps you straight to a date</p>
   </section>
