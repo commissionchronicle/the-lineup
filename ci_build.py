@@ -717,7 +717,7 @@ def cover_overlay_html(v):
         parts.append(
             f'<div class="cov-line cov-b"><p class="cov-kick cov-mag">{esc(kick)}</p>'
             f'<p class="cov-head"><span class="{h1c}">{esc(h1)}</span><br>NIGHT</p>'
-            f'<p class="cov-sub">{n} event{"s" if n != 1 else ""}, one city — '
+            f'<p class="cov-sub">{n} event{"s" if n != 1 else ""} — '
             'the week’s biggest night</p></div>')
     ops = v.get("openings") or []
     if ops:
