@@ -596,6 +596,158 @@ def event_order_key(e):
     return int(datetime.combine(e["day"], dt_time(23, 59), PT).timestamp())
 
 
+# --- Cover overlay (2026-10-28) -------------------------------------------
+# Page 1 is a swappable PHOTO (assets-inline key "cover") with the
+# Newsstand cover's words as a live HTML overlay: the words below are
+# computed from the same event data as the rest of the magazine, so they
+# refresh every build while the photo only changes when the asset does.
+# Layout/type replicate the approved mock (newsstand-cover-mock-v5.png):
+# heavy condensed sans heads, monospace dates, Pitch Black / Cyber
+# Magenta / Toxic Green / Neon Cyan (CSS lives with .cover-overlay in
+# template.html). COVER_EDITION is the chip that belongs to the PHOTO,
+# not the week — swap it when the cover asset changes.
+COVER_EDITION = "HALLOWEEN EDITION"
+COVER_WEEK_DAYS = 7        # cover week = today PT through today + 6
+COVER_OPENINGS_DAYS = 30   # Server Watch horizon past the cover week
+
+_OPENING_TAILS = ("grand opening", "server opening", "server inauguration",
+                  "inauguration", "reopening", "reabertura", "abertura",
+                  "opening", "launch", "estreia")
+_BRAND_TAILS = ("car meet", "carmeet", "meetup", "meet")
+
+
+def _strip_tails(name, tails):
+    """Repeatedly strip trailing phrases ('Paradise RP Launch' -> 'Paradise RP')."""
+    changed = True
+    while changed:
+        changed = False
+        low = name.lower()
+        for tail in tails:
+            if low.endswith(tail) and len(name) > len(tail):
+                name = name[: -len(tail)].strip(" -–—·,")
+                changed = True
+                break
+    return name
+
+
+def _cover_opening(e):
+    """True when the event reads as a server/city opening or reopening."""
+    if "launch" in e["cats"]:
+        return True
+    t = e["title"].lower()
+    return any(w in t for w in LAUNCH_WORDS) or "reopen" in t
+
+
+def _opening_name(title):
+    """Short server name for the Server Watch sub-line."""
+    name = _strip_tails(title.split(" — ")[0].strip(), _OPENING_TAILS)
+    return name or title
+
+
+def _host_brand(host_events, handle):
+    """Cover display name for a host: their most-listed event title with
+    the generic meet suffixes stripped ('Clean Culture Meet' -> 'Clean
+    Culture'); falls back to a prettified handle."""
+    title = Counter(e["title"] for e in host_events).most_common(1)[0][0]
+    name = _strip_tails(title.split(" — ")[0].strip(), _BRAND_TAILS)
+    if not name or len(name) < 3:
+        name = re.sub(r"[._]+", " ", handle.lstrip("@")).strip().title()
+    return name
+
+
+def cover_values(events, today):
+    """The words on this build's cover, computed from the event data."""
+    wk_end = today + timedelta(days=COVER_WEEK_DAYS - 1)
+    week = [e for e in events if today <= e["day"] <= wk_end]
+    vals = {"dates": (f"{MON3[today.month - 1]} {today.day} – "
+                      f"{MON3[wk_end.month - 1]} {wk_end.day}, {wk_end.year}"),
+            "edition": COVER_EDITION, "week": week, "openings": []}
+    if not week:
+        return vals
+    vals["count"] = len(week)
+    by_day = Counter(e["day"] for e in week)
+    big_day, big_n = None, -1
+    for d in sorted(by_day):
+        if by_day[d] > big_n:
+            big_day, big_n = d, by_day[d]
+    vals["big_day"], vals["big_n"] = big_day, big_n
+    horizon = wk_end + timedelta(days=COVER_OPENINGS_DAYS)
+    ops = [e for e in events
+           if wk_end < e["day"] <= horizon and _cover_opening(e)]
+    ops.sort(key=lambda e: (e["day"], event_order_key(e), e["title"]))
+    vals["openings"] = ops
+    by_host = {}
+    for e in week:
+        by_host.setdefault(e["host"], []).append(e)
+    best = None
+    for handle, hev in by_host.items():
+        key = (-len(hev), min(event_order_key(e) for e in hev),
+               handle.lower())
+        if best is None or key < best[0]:
+            best = (key, handle, hev)
+    _, vals["host_handle"], vals["host_events"] = best
+    vals["host_days"] = sorted({e["day"] for e in vals["host_events"]})
+    vals["host_brand"] = _host_brand(vals["host_events"], vals["host_handle"])
+    return vals
+
+
+def cover_overlay_html(v):
+    """Inner HTML for .cover-overlay (the template's __COVER_OVERLAY__)."""
+    parts = ['<div class="cov-scrims" aria-hidden="true"></div>']
+    parts.append(
+        f'<div class="cov-strip"><span>{esc(v["dates"])}</span></div>'
+        '<div class="cov-tags"><span class="cov-chip">GTA RP EVENT MAGAZINE</span>'
+        f'<span class="cov-chip">{esc(v["edition"])}</span>'
+        '<span class="cov-loc">LOS SANTOS</span></div>'
+        '<div class="cov-mast">THE LINEUP</div><div class="cov-rule"></div>')
+    if v.get("count"):
+        parts.append(
+            '<div class="cov-line cov-a"><p class="cov-kick cov-cyan">'
+            'THIS WEEK’S FULL BOARD</p>'
+            f'<p class="cov-head"><span class="cov-mag">{v["count"]}</span> '
+            'MEETS<br>INSIDE!</p>'
+            '<p class="cov-sub">Every meet, opening &amp; launch, listed</p></div>')
+        d = v["big_day"]
+        kick = f'{DOW3[d.weekday()]} · {MON3[d.month - 1]} {d.day}'
+        if (d.month, d.day) == (10, 31):
+            h1, h1c = "HALLOWEEN", "cov-mag"
+        else:
+            h1, h1c = d.strftime("%A").upper(), "cov-wht"
+        n = v["big_n"]
+        parts.append(
+            f'<div class="cov-line cov-b"><p class="cov-kick cov-mag">{esc(kick)}</p>'
+            f'<p class="cov-head"><span class="{h1c}">{esc(h1)}</span><br>NIGHT</p>'
+            f'<p class="cov-sub">{n} event{"s" if n != 1 else ""}, one city — '
+            'the week’s biggest night</p></div>')
+    ops = v.get("openings") or []
+    if ops:
+        month = ops[0]["day"].strftime("%B").upper()
+        names = " · ".join(esc(_opening_name(e["title"])) for e in ops[:3])
+        if len(ops) > 3:
+            names += " + more"
+        parts.append(
+            '<div class="cov-line cov-c"><p class="cov-kick cov-toxic">'
+            'PLUS — SERVER WATCH</p>'
+            f'<p class="cov-head">EVERY <span class="cov-toxic">{month}</span>'
+            '<br>SERVER OPENING</p>'
+            f'<p class="cov-sub">{names}</p></div>')
+    if v.get("count"):
+        pat = " + ".join(DOW3[d.weekday()].title() for d in v["host_days"])
+        word = "DOUBLEHEADER" if len(v["host_days"]) == 2 else "WEEK"
+        parts.append(
+            '<div class="cov-line cov-d"><p class="cov-kick cov-cyan">'
+            'HOST SPOTLIGHT</p>'
+            f'<p class="cov-head">{esc(v["host_brand"].upper())}’S<br>'
+            f'<span class="cov-mag">{word}</span></p>'
+            f'<p class="cov-sub cov-mono">{esc(pat)} meets · '
+            f'{esc(v["host_handle"])}</p></div>')
+    parts.append(
+        '<div class="cov-foot"><div class="cov-barcode" aria-hidden="true">'
+        '<i></i></div><p class="cov-free">FREE · OUT EVERY THURSDAY</p>'
+        '<p class="cov-handle">@gtarpnoticeboard</p></div>')
+    return "".join(parts)
+
+
 # --- Organizer flyers: REMOVED 2026-10-25 at Kani's direction --------------
 # The fetched-flyer figures never sat right in the card box, so the
 # magazine is back to link-only cards (the "Flyer post" chip). The build
@@ -1028,7 +1180,6 @@ function step(dir){
 }
 prevBtn.addEventListener('click',function(){step(-1)});
 nextBtn.addEventListener('click',function(){step(1)});
-document.getElementById('openBtn').addEventListener('click',function(){step(1)});
 document.addEventListener('keydown',function(ev){
   if(ev.target.tagName==='INPUT'||ev.target.tagName==='TEXTAREA')return;
   if(ev.key==='ArrowRight'){step(1)}
@@ -1306,14 +1457,16 @@ def main():
          '<p class="flip-hint">Flip with Prev / Next, arrow keys, or a swipe — Hosts jumps you straight to an organizer</p>',
          "flip hint")
 
-    # Cover: page 1 is the Newsstand cover PHOTO carried in the template
-    # itself (words-free Halloween photo; the only chrome is the floating
-    # TAP TO OPEN chip).
-    # The old slim-cover surgery (chip / range / pills / dek swaps) is
-    # retired with the markup it targeted. Assert the photo cover is
-    # present so a template regression fails the build loudly.
+    # Cover: page 1 is the swappable cover PHOTO carried in the template,
+    # with the Newsstand words as a live HTML overlay computed from this
+    # build's event data (cover_values / cover_overlay_html above). The
+    # photo inlines below from the assets key "cover"; the words refresh
+    # every build. Assert the anchors so a template regression fails loud.
     assert out.count('class="cover-screen photo"') == 1, "cover section anchor"
     assert out.count('src="assets/cover.webp"') == 1, "cover img anchor"
+    assert out.count('__COVER_OVERLAY__') == 1, "cover overlay anchor"
+    cvals = cover_values(events, today)
+    out = out.replace('__COVER_OVERLAY__', cover_overlay_html(cvals))
 
     # Inline the artwork from assets-inline.json (the CI equivalent of
     # inline-assets.py: the repo holds the data URIs as text, substituted
@@ -1347,6 +1500,13 @@ def main():
     first = host_list[0]
     fe = events[first["eis"][0]]
     print(f"first host page: {first['handle']} — next up {fe['title']} ({fe['date_key']}, {fe['time']})")
+    if cvals.get("count"):
+        print(f"cover  : week {cvals['dates']} | {cvals['count']} meets inside | "
+              f"biggest night {day_label(cvals['big_day'])} ({cvals['big_n']}) | "
+              f"spotlight {cvals['host_brand']} {cvals['host_handle']} | "
+              f"server watch: {len(cvals['openings'])} openings")
+    else:
+        print("cover  : no events in the cover week — board/night/spotlight lines omitted")
     timed_n = sum(1 for e in events if e["start_ts"] is not None)
     print(f"countdowns: {timed_n} timed events | {total - timed_n} time-TBA (no countdown)")
     now = time.time()

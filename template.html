@@ -8,7 +8,7 @@
 <title>The Lineup — GTA RP Event Magazine</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 /* ===== NEON FLIP-THROUGH — cover first, then one spread per day ===== */
 :root{
@@ -85,15 +85,45 @@ img{display:block; max-width:100%}
 .page.back.active{animation:flipBack .38s ease both}
 @keyframes flipBack{from{opacity:0; transform:translateX(-26px)}to{opacity:1; transform:none}}
 
-/* COVER SCREEN — page 1 is the Newsstand cover PHOTO (Halloween,
-   words-free, approved 2026-10-28): the cover page is just the framed
-   photo plus a floating TAP TO OPEN chip (the chip keeps id="openBtn" —
-   the page script wires it to step(1)). */
+/* COVER SCREEN — page 1: a swappable PHOTO (assets key "cover") with the
+   Newsstand cover's words as a live HTML overlay (.cover-overlay, inner
+   HTML computed per build by the generator and substituted into the
+   cover section). Words and photo live separate lives: the overlay
+   refreshes with the event data, the photo only changes when the asset
+   does. Type per the media guide / approved mock: Anton (heavy
+   condensed) for masthead + cover lines, mono for dates, Pitch Black /
+   Cyber Magenta / Toxic Green / Neon Cyan; sizes in cqw so the layout
+   scales with the frame exactly like the 1080x1350 mock. CSS gradient
+   scrims + text shadows keep every word off the photo's mercy. */
 .cover-screen{position:relative; margin:22px auto 0; border:1px solid var(--cyan-soft); border-top:2px solid rgba(244,113,182,.65); border-radius:14px; background:#000; overflow:hidden; box-shadow:0 0 22px rgba(34,211,238,.14), 0 0 46px rgba(232,121,249,.08)}
-.cover-screen.photo{width:min(100%,70vh); aspect-ratio:4/5}
-.cover-screen.photo>img{display:block; width:100%; height:100%; object-fit:contain}
-.open-chip{position:absolute; left:50%; bottom:16px; transform:translateX(-50%); z-index:3; appearance:none; border:1px solid var(--pink); background:rgba(13,7,22,.85); color:var(--pink-hi); font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; padding:10px 18px; border-radius:999px; cursor:pointer; box-shadow:0 0 14px rgba(244,113,182,.4); white-space:nowrap}
-.open-chip:hover{background:rgba(244,113,182,.3); color:#fdf2f8}
+.cover-screen.photo{width:min(100%,70vh); aspect-ratio:4/5; container-type:inline-size}
+.cover-screen.photo>img{display:block; width:100%; height:100%; object-fit:cover}
+.cover-overlay{position:absolute; inset:0; z-index:2; pointer-events:none; --cmag:#ff2d78; --ctox:#39ff14; --ccyn:#2de1ff; --cpit:#06060c; font-family:var(--sans)}
+.cov-scrims{position:absolute; inset:0; background:linear-gradient(180deg, rgba(3,3,8,.93) 0%, rgba(3,3,8,.5) 14%, rgba(3,3,8,0) 33%), linear-gradient(0deg, rgba(3,3,8,.94) 0%, rgba(3,3,8,.4) 13%, rgba(3,3,8,0) 31%), linear-gradient(90deg, rgba(3,3,8,.48) 0%, rgba(3,3,8,0) 54%), linear-gradient(270deg, rgba(3,3,8,.44) 0%, rgba(3,3,8,0) 54%)}
+.cov-strip{position:absolute; top:2.1%; left:4.3%; right:4.3%; text-align:right; font-family:var(--mono); font-size:2.25cqw; letter-spacing:.1em; color:#f5f5fa; border-bottom:2px solid rgba(245,245,250,.92); padding-bottom:1.5cqw; text-shadow:0 2px 6px rgba(0,0,0,.9)}
+.cov-tags{position:absolute; top:6.6%; left:4.3%; right:4.3%; display:flex; align-items:center; gap:1.3cqw}
+.cov-chip{background:var(--ctox); color:var(--cpit); font-family:var(--mono); font-weight:700; font-size:1.95cqw; letter-spacing:.05em; line-height:1; padding:.8cqw 1.1cqw; white-space:nowrap; box-shadow:0 2px 10px rgba(0,0,0,.55)}
+.cov-loc{margin-left:auto; font-family:var(--mono); font-size:1.95cqw; letter-spacing:.16em; color:#c8cddc; text-shadow:0 2px 6px rgba(0,0,0,.9); white-space:nowrap}
+.cov-mast{position:absolute; top:10.1%; left:0; right:0; text-align:center; font-family:'Anton', 'Arial Narrow', sans-serif; font-size:17.8cqw; line-height:1; letter-spacing:.005em; color:#fff; text-shadow:-.5cqw 0 1.4cqw rgba(255,45,120,.5), .5cqw 0 1.4cqw rgba(45,225,255,.5), 0 .35cqw 0 rgba(6,6,12,.9), 0 0 3cqw rgba(0,0,0,.6)}
+.cov-rule{position:absolute; top:25.9%; left:4.3%; right:4.3%; height:.38cqw; background:var(--cmag); box-shadow:0 0 1.2cqw rgba(255,45,120,.65)}
+.cov-line{position:absolute; width:46.5%; z-index:2}
+.cov-a{left:4.3%; top:34.6%}
+.cov-b{left:4.3%; top:64.8%}
+.cov-c{right:4.3%; top:45.3%; text-align:right}
+.cov-d{right:4.3%; top:77.8%; text-align:right}
+.cov-kick{font-family:'Anton', 'Arial Narrow', sans-serif; font-size:2.75cqw; letter-spacing:.13em; margin:0 0 1.1cqw; text-shadow:0 2px 8px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.9)}
+.cov-head{font-family:'Anton', 'Arial Narrow', sans-serif; font-size:6.9cqw; line-height:1.06; margin:0; color:#fff; text-transform:uppercase; text-shadow:.3cqw .3cqw 0 rgba(6,6,12,.82), 0 0 2.6cqw rgba(0,0,0,.7)}
+.cov-sub{font-size:2.6cqw; line-height:1.28; margin:1cqw 0 0; color:#f5f5fa; text-shadow:0 2px 7px rgba(0,0,0,.92), 0 0 2px rgba(0,0,0,.9)}
+.cov-sub.cov-mono{font-family:var(--mono); font-size:2.35cqw; letter-spacing:.03em}
+.cov-mag{color:var(--cmag)}
+.cov-toxic{color:var(--ctox)}
+.cov-cyan{color:var(--ccyn)}
+.cov-wht{color:#fff}
+.cov-foot{position:absolute; left:4.3%; bottom:3.3%; z-index:2}
+.cov-barcode{width:16.3cqw; aspect-ratio:2.05; background:#fafafa; padding:1cqw 1.2cqw; box-shadow:0 2px 10px rgba(0,0,0,.55)}
+.cov-barcode i{display:block; height:100%; background:repeating-linear-gradient(90deg, #0a0a0a 0 .25cqw, transparent .25cqw .45cqw, #0a0a0a .45cqw .8cqw, transparent .8cqw 1cqw, #0a0a0a 1cqw 1.15cqw, transparent 1.15cqw 1.5cqw, #0a0a0a 1.5cqw 1.95cqw, transparent 1.95cqw 2.2cqw)}
+.cov-free{font-family:'Anton', 'Arial Narrow', sans-serif; font-size:2.4cqw; letter-spacing:.1em; color:#fff; margin:1.1cqw 0 0; text-shadow:0 2px 7px rgba(0,0,0,.92)}
+.cov-handle{font-size:2.05cqw; color:#c8cddc; margin:.45cqw 0 0; text-shadow:0 2px 7px rgba(0,0,0,.92)}
 .flip-hint{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink3); text-align:center; padding:0 0 26px}
 
 /* DAY SPREAD HEAD — huge day numeral */
@@ -230,7 +260,7 @@ a.ig:hover{color:#fbcfe8; text-decoration:underline; text-underline-offset:3px}
   <section class="page active" data-title="Cover" aria-label="Cover">
     <div class="cover-screen photo">
       <img src="assets/cover.webp" alt="Halloween night in Los Santos — black classics with magenta and cyan underglow, glowing green jack-o'-lanterns, spider webs and fog on a wet neon street"/>
-      <button class="open-chip" id="openBtn" type="button">Tap to open →</button>
+      <div class="cover-overlay">__COVER_OVERLAY__</div>
     </div>
     <p class="flip-hint">Flip with Prev / Next, arrow keys, or a swipe — Days jumps you straight to a date</p>
   </section>
@@ -501,7 +531,6 @@ function step(dir){
 }
 prevBtn.addEventListener('click',function(){step(-1)});
 nextBtn.addEventListener('click',function(){step(1)});
-document.getElementById('openBtn').addEventListener('click',function(){step(1)});
 document.addEventListener('keydown',function(ev){
   if(ev.target.tagName==='INPUT'||ev.target.tagName==='TEXTAREA')return;
   if(ev.key==='ArrowRight'){step(1)}
